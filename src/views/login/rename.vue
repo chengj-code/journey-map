@@ -1,9 +1,8 @@
 <template>
     <div>
-        首页
+        重命名
     </div>
 </template>
-
 <script setup lang="ts">
 
 </script>

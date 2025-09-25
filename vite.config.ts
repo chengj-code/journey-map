@@ -3,10 +3,12 @@ import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import Components from 'unplugin-vue-components/vite';
 import { VantResolver } from 'unplugin-vue-components/resolvers'; // 引入 Vant 的解析器
+import tailwindcss from '@tailwindcss/vite' // 导入插件
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [
         vue(),
+        tailwindcss(),
         Components({
             resolvers: [VantResolver()], // 使用 Vant 的解析器
         }),

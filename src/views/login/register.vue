@@ -1,9 +1,8 @@
 <template>
     <div>
-        首页
+        注册
     </div>
 </template>
-
 <script setup lang="ts">
 
 </script>
