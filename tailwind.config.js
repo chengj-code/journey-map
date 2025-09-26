@@ -8,4 +8,8 @@ export default {
         extend: {},
     },
     plugins: [],
+    corePlugins: {
+        // 禁用Preflight，避免与你的reset.less冲突
+        preflight: false,
+    },
 }
