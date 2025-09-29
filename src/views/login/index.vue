@@ -33,12 +33,16 @@ const username = ref('chengj')
 const password = ref('123456')
 // 密码是长度6-12位的大小写字母（a-z, A-Z）、数字（0-9）和下划线（_）
 const pattern = /^[a-zA-Z0-9_]{6,12}$/
+const router = useRouter()
 const onSubmit = async () => {
-    showLoadingToast({ message: '登录中', overlay: true, });
+    showLoadingToast({
+        message: '登录中', overlay: true, onClose: () => {
+            router.replace({ name: 'layout' })
+        }
+    });
     console.log('username', username.value)
     console.log('password', password.value)
 }
-const router = useRouter()
 const toRegister = () => {
     router.push({ name: 'register' })
 }
