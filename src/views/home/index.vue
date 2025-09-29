@@ -1,135 +1,142 @@
 <template>
     <div class="h-[100%]">
+        <div class="w-[50%] mode-select">
+            <van-field v-model="modeValue" is-link readonly label="模式" placeholder="选择模式" @click="showPicker = true" />
+            <van-popup v-model:show="showPicker" destroy-on-close round position="bottom">
+                <van-picker :model-value="pickerValue" :columns="columns" @cancel="showPicker = false"
+                    @confirm="modeChangeFn" />
+            </van-popup>
+        </div>
         <div class="w-[100%] h-[70%]" id="echarts-container"></div>
+        <div class="highlight-select">
+            <van-field v-model="fieldValue" is-link readonly label="点亮地区" placeholder="请选择点亮地区" @click="show = true" />
+            <van-popup v-model:show="show" round position="bottom">
+                <van-cascader v-model="cascaderValue" title="请选择所在地区" :options="options" @close="show = false"
+                    @finish="onFinish" />
+            </van-popup>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import * as echarts from 'echarts';
 import chinaMap from "@/assets/map/china.json";
-import { onMounted } from 'vue';
-onMounted(() => {
-    // 基于准备好的dom，初始化echarts实例
-    let myChart = echarts.init(document.getElementById('echarts-container'));
-    echarts.registerMap("china", chinaMap as any);
-    var series = [{
-        type: 'map',
-        map: 'china',
-        //    width: '100%',
-        geoIndex: 1,
-        zlevel: 1,
-        //    aspectScale: 0.75, //长宽比
-        showLegendSymbol: false, // 存在legend时显示
-        label: {
-            normal: {
-                show: false,
-            },
-            emphasis: {
-                show: false,
-                textStyle: {
-                    color: '#fff'
-                }
-            }
-        },
-        roam: false, // 开启缩放平移
-        itemStyle: {
-            normal: {
-                areaColor: 'rgba(128, 128, 128, 0)',
-                borderColor: '#49a7d5', //省市边界线00fcff 516a89
+import { computed, onMounted, ref } from 'vue';
+import { useCascaderAreaData } from '@vant/area-data';
+import { Numeric } from 'vant/lib/utils';
+const columns = [
+    { text: '市级', value: 'city' },
+    { text: '省级', value: 'provice' },
+];
+const modeValue = ref('市级');
+const showPicker = ref(false);
+const pickerValue = ref<Numeric[]>([]);
+const modeChangeFn = ({ selectedValues, selectedOptions }) => {
+    showPicker.value = false;
+    pickerValue.value = selectedValues;
+    modeValue.value = selectedOptions[0].text;
+};
 
-            },
-            emphasis: {
-                areaColor: 'rgba(128, 128, 128, 0)',
-            }
+const show = ref(false);
+const fieldValue = ref('');
+const cascaderValue = ref('');
+const options = useCascaderAreaData();
+options.forEach(a => {
+    a.children?.forEach(b => delete b.children);
+})
+const onFinish = ({ selectedOptions }) => {
+    show.value = false;
+    fieldValue.value = selectedOptions.map((option) => option.text).join('/');
+    let selectCityName = selectedOptions[1].text;
+    updateHighlightData(selectCityName);
+};
+
+const highLightData = ref([{
+    name: "杭州市",
+    selected: true
+}]);
+
+let option = computed(() => ({
+    backgroundColor: '#000',
+    series: [{
+        type: 'map',
+        map: 'china', // 使用已注册的地图名称
+        roam: true, // 开启缩放平移
+        selectedMode: 'multiple', // 开启多选
+        layoutCenter: ['50%', '50%'], //地图位置
+        scaleLimit: { // 设置缩放范围
+            min: 1.2,
+            max: 12
         },
-        data: [{
-            name: '南海诸岛',
-            value: 0,
-            itemStyle: {
-                normal: {
-                    opacity: 0,
-                    label: {
-                        show: false
-                    }
-                }
-            }
-        }]
-    }, {
-        type: 'effectScatter',
-        coordinateSystem: 'geo',
-        zlevel: 4,
-        symbolSize: 30,
+        zoom: 1.2, // 初始缩放级别
         label: {
-            normal: {
-                show: true,
-                position: 'right',
-                formatter: '{b}',
-                color: 'white'
-            }
+            show: false
         },
-        itemStyle: {
-            normal: {
-                color: '#c9b972'
-            }
+        itemStyle: { // 默认地图区域的多边形 图形样式。
+            areaColor: '#171d26',
+            borderColor: '#303745'
         },
-        rippleEffect: {
-            scale: 10,
-            brushType: 'stroke'
-        },
-        // data: [{
-        //     name: "美克总部",
-        //     value: [87.568283, 43.857571],
-        //     visualMap: false
-        // }],
-    }];
-    let option: echarts.EChartsCoreOption = {
-        backgroundColor: '#051b4a',
-        tooltip: {
-            trigger: 'item'
-        },
-        geo: {
-            map: 'china',
-            zoom: 1,
+        emphasis: { // 高亮状态下的多边形和标签样式。
             label: {
-                emphasis: {
-                    show: false
-                }
+                show: false
             },
-            roam: true,
             itemStyle: {
-                normal: {
-                    borderColor: 'rgba(147, 235, 248, 1)',
-                    borderWidth: 1,
-                    areaColor: {
-                        type: 'radial',
-                        x: 0.5,
-                        y: 0.5,
-                        r: 0.8,
-                        colorStops: [{
-                            offset: 0,
-                            color: 'rgba(147, 235, 248, 0)' // 0% 处的颜色
-                        }, {
-                            offset: 1,
-                            color: 'rgba(147, 235, 248, .2)' // 100% 处的颜色
-                        }],
-                        globalCoord: false // 缺省为 false
-                    },
-                    shadowColor: 'rgba(128, 217, 248, 1)',
-                    // shadowColor: 'rgba(255, 255, 255, 1)',
-                    shadowOffsetX: -2,
-                    shadowOffsetY: 2,
-                    shadowBlur: 10
-                },
-                emphasis: {
-                    areaColor: '#389BB7',
-                    borderWidth: 0
-                }
+                areaColor: '#14536c',
+                borderColor: '#fff'
             }
         },
-        series: series
-    };
+        select: { // 选中状态下的多边形和标签样式
+            label: {
+                show: true,
+                color: '#fff',
+            },
+            itemStyle: {
+                areaColor: '#14536c',
+                borderColor: '#fff'
+            }
+        },
+        // 如果需要，配置南海诸岛区域样式
+        regions: [{
+            name: '南海诸岛',
+            itemStyle: {
+                areaColor: 'transparent',
+                borderColor: 'transparent'
+            },
+            label: {
+                show: false
+            }
+        }],
+        data: highLightData.value,
+    }]
+}));
+let myChart = null;
+const initCityLevelEcharts = (option: echarts.EChartsOption) => {
+    // 基于准备好的dom，初始化echarts实例
+    echarts.registerMap("china", chinaMap as any);
+    // #171d26 #303745 #14536c
+
     myChart.setOption(option);
+}
+const updateHighlightData = (name: string) => {
+    highLightData.value.push({
+        name,
+        selected: true,
+    })
+    myChart.clear();
+    myChart.setOption(option.value);
+}
+onMounted(() => {
+    myChart = echarts.init(document.getElementById('echarts-container'));
+    initCityLevelEcharts(option.value);
 })
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+:deep(.mode-select .van-field__label) {
+    width: 30px;
+}
+
+:deep(.highlight-select .van-field__label) {
+    width: 60px;
+}
+</style>
