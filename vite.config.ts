@@ -20,7 +20,7 @@ export default defineConfig({
     },
     server: {
         // 可选：配置开发服务器
-        port: 3000, // 设置服务端口号
+        // port: 3000, // 设置服务端口号
         open: true, // 服务启动后自动打开浏览器
     },
     css: {
