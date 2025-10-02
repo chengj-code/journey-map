@@ -1,8 +1,8 @@
 <template>
-    <div class="w-[100%] h-[100%]" id="echarts-container"></div>
+    <div class="w-[100%] h-[100%]" ref="echartsContainer"></div>
 </template>
 <script lang="ts" setup name="Person">
-import { ref, onMounted, defineProps, watch, PropType, computed, onUnmounted } from 'vue';
+import { ref, onMounted, defineProps, watch, PropType, computed, onUnmounted, nextTick } from 'vue';
 import * as echarts from 'echarts';
 import chinaMap from "@/assets/map/china.json";
 import { highlightData } from '@/store/modules/types/type';
@@ -34,7 +34,7 @@ let option = computed(() => ({
         layoutCenter: ['50%', '50%'], //地图位置
         scaleLimit: { // 设置缩放范围
             min: 1.2,
-            max: 20
+            max: 30
         },
         zoom: mapOptions.value.zoom, // 初始缩放级别
         label: {
@@ -77,7 +77,9 @@ let option = computed(() => ({
         data: props.highlight,
     }]
 }));
+const echartsContainer = ref(null);
 let myChart = null;
+let resizeObserver = null
 /**重置地图大小 */
 const resetMap = () => {
     myChart.clear();
@@ -87,10 +89,21 @@ watch(() => props.highlight, () => {
     resetMap();
 }, { deep: true })
 onMounted(() => {
-    myChart = echarts.init(document.getElementById('echarts-container'));
-    myChart.setOption(option.value);
+    resizeObserver = new ResizeObserver(() => {
+        if (myChart) {
+            myChart.resize()
+        }
+    })
+    resizeObserver.observe(echartsContainer.value)
+    nextTick(() => {
+        myChart = echarts.init(echartsContainer.value);
+        myChart.setOption(option.value);
+    })
 })
 onUnmounted(() => {
+    if (resizeObserver) {
+        resizeObserver.disconnect()
+    }
     if (myChart) {
         myChart.dispose()
     }
@@ -100,4 +113,11 @@ defineExpose({
 })
 </script>
 
-<style scoped></style>
+<style scoped lang="less">
+:deep(#echarts-container) {
+    div {
+        width: 100% !important;
+        height: 100% !important;
+    }
+}
+</style>
