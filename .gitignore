@@ -22,7 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-*.vue.js
-*.vue.ts
-*.vue.d.ts
-

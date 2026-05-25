@@ -55,12 +55,4 @@ export default [
             title: '注册',
         },
     },
-    {
-        path: '/icon-gallery',
-        name: 'iconGallery',
-        component: function () { return import('@/views/icon-gallery/index.vue'); },
-        meta: {
-            title: '图标库',
-        },
-    },
 ];

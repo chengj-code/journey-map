@@ -11,11 +11,7 @@
           :title="item.name"
         >
           <template #icon>
-            <IconProvince
-              :provinceName="item.name"
-              :size="32"
-              class="icon"
-            />
+            <component :is="getProvinceIcon(item.name)" class="icon" />
           </template>
         </van-cell>
       </van-cell-group>
@@ -38,8 +34,44 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { Component } from 'vue'
 import { useMapStore } from '@/store'
-import { IconProvince } from '@/components/icons'
+import {
+  IconBeijing,
+  IconTianjin,
+  IconShanghai,
+  IconChongqing,
+  IconHebei,
+  IconShanxi,
+  IconLiaoning,
+  IconJilin,
+  IconHeilongjiang,
+  IconJiangsu,
+  IconZhejiang,
+  IconAnhui,
+  IconFujian,
+  IconJiangxi,
+  IconShandong,
+  IconHenan,
+  IconHubei,
+  IconHunan,
+  IconGuangdong,
+  IconHainan,
+  IconSichuan,
+  IconGuizhou,
+  IconYunnan,
+  IconShaanxi,
+  IconGansu,
+  IconQinghai,
+  IconTaiwan,
+  IconInnerMongolia,
+  IconGuangxi,
+  IconTibet,
+  IconNingxia,
+  IconXinjiang,
+  IconHongKong,
+  IconMacau,
+} from '@/components/icons'
 
 const mapStore = useMapStore()
 
@@ -48,6 +80,47 @@ const cityData = computed(() => mapStore.cityData.filter(item => item.selected))
 
 const provinceCount = computed(() => provinceData.value.length)
 const cityCount = computed(() => cityData.value.length)
+
+const provinceIconMap: Record<string, Component> = {
+  '北京市': IconBeijing,
+  '天津市': IconTianjin,
+  '上海市': IconShanghai,
+  '重庆市': IconChongqing,
+  '河北省': IconHebei,
+  '山西省': IconShanxi,
+  '辽宁省': IconLiaoning,
+  '吉林省': IconJilin,
+  '黑龙江省': IconHeilongjiang,
+  '江苏省': IconJiangsu,
+  '浙江省': IconZhejiang,
+  '安徽省': IconAnhui,
+  '福建省': IconFujian,
+  '江西省': IconJiangxi,
+  '山东省': IconShandong,
+  '河南省': IconHenan,
+  '湖北省': IconHubei,
+  '湖南省': IconHunan,
+  '广东省': IconGuangdong,
+  '海南省': IconHainan,
+  '四川省': IconSichuan,
+  '贵州省': IconGuizhou,
+  '云南省': IconYunnan,
+  '陕西省': IconShaanxi,
+  '甘肃省': IconGansu,
+  '青海省': IconQinghai,
+  '台湾省': IconTaiwan,
+  '内蒙古自治区': IconInnerMongolia,
+  '广西壮族自治区': IconGuangxi,
+  '西藏自治区': IconTibet,
+  '宁夏回族自治区': IconNingxia,
+  '新疆维吾尔自治区': IconXinjiang,
+  '香港特别行政区': IconHongKong,
+  '澳门特别行政区': IconMacau,
+}
+
+const getProvinceIcon = (name: string): Component => {
+  return provinceIconMap[name] || IconBeijing
+}
 </script>
 
 <style scoped lang="less">
