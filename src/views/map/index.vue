@@ -7,12 +7,14 @@
     />
     
     <div class="map-content">
-        <div class="w-[50%] mode-select">
-            <van-field v-model="modeValue" is-link readonly label="模式" placeholder="选择模式" @click="showPicker = true" />
-            <van-popup v-model:show="showPicker" destroy-on-close round position="bottom">
-                <van-picker :model-value="pickerValue" :columns="columns" @cancel="showPicker = false"
-                    @confirm="modeChangeFn" />
-            </van-popup>
+        <div class="control-bar">
+            <div class="mode-select">
+                <van-field v-model="modeValue" is-link readonly label="模式" placeholder="选择模式" @click="showPicker = true" />
+                <van-popup v-model:show="showPicker" destroy-on-close round position="bottom">
+                    <van-picker :model-value="pickerValue" :columns="columns" @cancel="showPicker = false"
+                        @confirm="modeChangeFn" />
+                </van-popup>
+            </div>
         </div>
         <div class="w-[100%] map-container">
             <div class="w-[100%] h-[100%]" id="echarts-container"></div>
@@ -21,12 +23,14 @@
                 <van-icon name="revoke" size="24" />
             </div>
         </div>
-        <div class="highlight-select">
-            <van-field v-model="fieldValue" is-link readonly label="点亮地区" placeholder="请选择点亮地区" @click="show = true" />
-            <van-popup v-model:show="show" round position="bottom">
-                <van-cascader v-model="cascaderValue" title="请选择所在地区" :options="cascaderOptions" @close="show = false"
-                    @finish="onFinish" />
-            </van-popup>
+        <div class="control-bar bottom-bar">
+            <div class="highlight-select">
+                <van-field v-model="fieldValue" is-link readonly label="点亮地区" placeholder="请选择点亮地区" @click="show = true" />
+                <van-popup v-model:show="show" round position="bottom">
+                    <van-cascader v-model="cascaderValue" title="请选择所在地区" :options="cascaderOptions" @close="show = false"
+                        @finish="onFinish" />
+                </van-popup>
+            </div>
         </div>
     </div>
   </div>
@@ -203,10 +207,23 @@ onMounted(() => {
     height: calc(100vh - 46px);
     display: flex;
     flex-direction: column;
+
+    .control-bar {
+      flex-shrink: 0;
+      padding: 8px 16px;
+      background-color: #111827;
+      border-bottom: 1px solid #1f2937;
+
+      &.bottom-bar {
+        border-bottom: none;
+        border-top: 1px solid #1f2937;
+      }
+    }
     
     .map-container {
       flex: 1;
       position: relative;
+      overflow: hidden;
     }
   }
 }
@@ -220,6 +237,7 @@ onMounted(() => {
 }
 
 :deep(.van-cell) {
-    background-color: #000;
+    background-color: transparent;
+    padding: 10px 0;
 }
 </style>
