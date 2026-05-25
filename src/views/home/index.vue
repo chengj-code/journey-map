@@ -63,7 +63,7 @@
               :size="32"
             />
             <div class="item-info">
-              <span class="item-name">{{ item.name }}</span>
+              <span class="item-name">{{ item.displayName || item.name }}</span>
             </div>
             <span class="item-date">{{ item.date }}</span>
           </div>
@@ -107,7 +107,8 @@ const recentItems = computed(() => {
     })),
     ...mapStore.cityData.map(item => ({
       ...item,
-      label: item.name?.slice(0, 2) || '??',
+      label: (item.fullName || item.name)?.slice(0, 2) || '??',
+      displayName: item.fullName || item.name,
       date: formatDate(item.name),
     })),
   ];
