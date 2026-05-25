@@ -51,27 +51,36 @@ const modeChangeFn = ({ selectedValues, selectedOptions }) => {
 const show = ref(false);
 const fieldValue = ref('');
 const cascaderValue = ref('');
-const rawOptions = useCascaderAreaData();
-// 创建完整选项副本（保留所有层级，用于市级模式）
-const fullOptions = JSON.parse(JSON.stringify(rawOptions));
-fullOptions.forEach(a => {
-    a.children?.forEach(b => {
-        // 四个直辖市和两个特别行政区不需要删除children属性
-        if (!["北京市", "天津市", "上海市", "重庆市", "香港特别行政区", "澳门特别行政区"].includes(a.text)) {
-            delete b.children
-        }
-    });
-})
+const areaData = useCascaderAreaData();
+
 const cascaderOptions = computed(() => {
   if (mapStore.currentMode === 'province') {
-    // 省级模式：返回仅包含第一层级的 options，移除所有 children
-    return rawOptions.map(item => ({
-      ...item,
-      children: undefined
+    // 省级模式：返回仅包含第一层级的 options
+    return areaData.map(item => ({
+      text: item.text,
+      value: item.value,
+      children: undefined  // 移除所有下级，只能选省
     }))
   }
-  // 市级模式：返回完整的三级联动数据（保留原有的特殊处理逻辑）
-  return fullOptions
+
+  // 市级模式：返回完整的三级联动数据
+  // 使用深拷贝避免污染原数据
+  const cityModeOptions = JSON.parse(JSON.stringify(areaData)) as typeof areaData;
+
+  // 只对普通省份进行处理：删除第三级（区），保留第二级（市）
+  cityModeOptions.forEach(province => {
+    // 直辖市和特别行政区：保留原样（它们本身就算"市级"）
+    if (["北京市", "天津市", "上海市", "重庆市", "香港特别行政区", "澳门特别行政区"].includes(province.text)) {
+      return; // 不做任何修改
+    }
+
+    // 普通省份：遍历城市，删除区的层级（保留城市供选择）
+    province.children?.forEach(city => {
+      delete city.children;  // 删除"区/县"，保留"市"
+    });
+  });
+
+  return cityModeOptions;
 })
 const onFinish = ({ selectedOptions }) => {
     show.value = false;
