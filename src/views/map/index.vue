@@ -9,7 +9,7 @@
     <div class="map-wrapper">
       <div class="map-container" id="echarts-container"></div>
       
-      <div class="float-panel float-top">
+      <div v-show="!showPicker" class="float-panel float-top">
         <div class="mode-chip" @click="showPicker = true">
           <span class="chip-label">模式</span>
           <span class="chip-value">{{ modeValue }}</span>
@@ -21,7 +21,7 @@
         </van-popup>
       </div>
 
-      <div class="float-panel float-bottom">
+      <div v-show="!show && !showPicker" class="float-panel float-bottom">
         <div class="area-select-card" @click="show = true">
           <van-icon name="location-o" size="18" color="#60a5fa" />
           <span class="area-text">{{ fieldValue || '选择点亮地区' }}</span>
@@ -33,7 +33,7 @@
         </van-popup>
       </div>
 
-      <div class="reset-btn" @click="resetMap">
+      <div v-show="!show && !showPicker" class="reset-btn" @click="resetMap">
         <van-icon name="revoke" size="20" color="#374151" />
       </div>
     </div>
