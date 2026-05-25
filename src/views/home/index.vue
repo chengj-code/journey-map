@@ -36,7 +36,7 @@ const mapStore = useMapStore();
 // 模式选择器
 const columns = [
     { text: '市级', value: 'city' },
-    { text: '省级', value: 'provice' },
+    { text: '省级', value: 'province' },
 ];
 const modeValue = ref('市级');
 const showPicker = ref(false);
@@ -75,13 +75,15 @@ const onFinish = ({ selectedOptions }) => {
     show.value = false;
     fieldValue.value = selectedOptions.map((option) => option.text).join('/');
     const selectName = selectedOptions[selectedOptions.length - 1]?.text;
-    
+    // 获取完整路径（省+市），用于统计页面展示
+    const fullName = fieldValue.value;
+
     if (mapStore.currentMode === 'province') {
       mapStore.addProvince(selectName);
     } else {
-      mapStore.addCity(selectName);
+      mapStore.addCity(selectName, fullName);
     }
-    
+
     updateHighlightMap();
 };
 

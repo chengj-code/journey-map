@@ -24,7 +24,7 @@
         <van-cell
           v-for="(item, index) in cityData"
           :key="index"
-          :title="item.name"
+          :title="item.fullName || item.name"
         />
       </van-cell-group>
       <van-empty v-else description="暂无市级点亮数据" />

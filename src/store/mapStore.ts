@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 interface MapItem {
   name: string;
   selected: boolean;
+  fullName?: string; // 完整路径，如"河北省/秦皇岛市"
 }
 
 type MapMode = 'city' | 'province';
@@ -30,12 +31,13 @@ export const useMapStore = defineStore('map', {
       }
     },
 
-    addCity(name: string) {
+    addCity(name: string, fullName?: string) {
       const existing = this.cityData.find((item) => item.name === name);
       if (existing) {
         existing.selected = true;
+        if (fullName) existing.fullName = fullName;
       } else {
-        this.cityData.push({ name, selected: true });
+        this.cityData.push({ name, selected: true, fullName });
       }
     },
 
