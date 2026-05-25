@@ -17,7 +17,7 @@
         <div class="highlight-select">
             <van-field v-model="fieldValue" is-link readonly label="点亮地区" placeholder="请选择点亮地区" @click="show = true" />
             <van-popup v-model:show="show" round position="bottom">
-                <van-cascader v-model="cascaderValue" title="请选择所在地区" :options="options" @close="show = false"
+                <van-cascader v-model="cascaderValue" title="请选择所在地区" :options="cascaderOptions" @close="show = false"
                     @finish="onFinish" />
             </van-popup>
         </div>
@@ -30,6 +30,9 @@ import chinaMap from "@/assets/map/china.json";
 import { computed, onMounted, ref } from 'vue';
 import { useCascaderAreaData } from '@vant/area-data';
 import { Numeric } from 'vant/lib/utils';
+import { useMapStore } from '@/store';
+
+const mapStore = useMapStore();
 // 模式选择器
 const columns = [
     { text: '市级', value: 'city' },
@@ -42,13 +45,14 @@ const modeChangeFn = ({ selectedValues, selectedOptions }) => {
     showPicker.value = false;
     pickerValue.value = selectedValues;
     modeValue.value = selectedOptions[0].text;
+    mapStore.setCurrentMode(selectedValues[0]);
 };
 // 点亮地区选择器
 const show = ref(false);
 const fieldValue = ref('');
 const cascaderValue = ref('');
-const options = useCascaderAreaData();
-options.forEach(a => {
+const rawOptions = useCascaderAreaData();
+rawOptions.forEach(a => {
     a.children?.forEach(b => {
         // 四个直辖市和两个特别行政区不需要删除children属性
         if (!["北京市", "天津市", "上海市", "重庆市", "香港特别行政区", "澳门特别行政区"].includes(a.text)) {
@@ -56,17 +60,33 @@ options.forEach(a => {
         }
     });
 })
+const cascaderOptions = computed(() => {
+  if (mapStore.currentMode === 'province') {
+    // 省级模式：返回仅包含第一层级的 options，移除所有 children
+    return rawOptions.map(item => ({
+      ...item,
+      children: undefined
+    }))
+  }
+  // 市级模式：返回完整的三级联动数据（保留原有的特殊处理逻辑）
+  return rawOptions
+})
 const onFinish = ({ selectedOptions }) => {
     show.value = false;
     fieldValue.value = selectedOptions.map((option) => option.text).join('/');
-    const selectCityName = selectedOptions[selectedOptions.length - 1]?.text;
-    updateHighlightData(selectCityName);
+    const selectName = selectedOptions[selectedOptions.length - 1]?.text;
+    
+    if (mapStore.currentMode === 'province') {
+      mapStore.addProvince(selectName);
+    } else {
+      mapStore.addCity(selectName);
+    }
+    
+    updateHighlightMap();
 };
 
 echarts.registerMap("china", chinaMap as any);
-const highLightData = ref([
-    { name: "杭州市", selected: true },
-]);
+const highLightData = computed(() => mapStore.currentData);
 const mapOptions = ref({
     backgroundColor: '#000',
     mapType: 'china',
@@ -136,21 +156,20 @@ const initCityLevelEcharts = (option) => {
     myChart.setOption(option);
 }
 /**
- * 更新高亮数据
- * @param name {string} 地区名称
+ * 更新高亮地图
  */
-const updateHighlightData = (name: string) => {
-    highLightData.value.push({
-        name,
-        selected: true,
-    })
+const updateHighlightMap = () => {
     myChart.clear();
     myChart.setOption(option.value);
 }
 /**重置地图大小 */
 const resetMap = () => {
-    myChart.clear();
-    myChart.setOption(option.value);
+    if (mapStore.currentMode === 'province') {
+      mapStore.resetProvince();
+    } else {
+      mapStore.resetCity();
+    }
+    updateHighlightMap();
 }
 onMounted(() => {
     myChart = echarts.init(document.getElementById('echarts-container'));

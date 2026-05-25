@@ -33,6 +33,14 @@ export default [
     },
     {
         path: '/',
+        name: 'statistics',
+        component: () => import('@/views/statistics/index.vue'),
+        meta: {
+            title: '点亮统计',
+        },
+    },
+    {
+        path: '/',
         name: 'rename',
         component: () => import('@/views/login/rename.vue'),
         meta: {
