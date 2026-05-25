@@ -1,3 +1,4 @@
+/// <reference types="../../../node_modules/.vue-global-types/vue_3.5_0.d.ts" />
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -20,51 +21,12 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 import { computed } from 'vue';
 import { useMapStore } from '@/store';
-import { IconBeijing, IconTianjin, IconShanghai, IconChongqing, IconHebei, IconShanxi, IconLiaoning, IconJilin, IconHeilongjiang, IconJiangsu, IconZhejiang, IconAnhui, IconFujian, IconJiangxi, IconShandong, IconHenan, IconHubei, IconHunan, IconGuangdong, IconHainan, IconSichuan, IconGuizhou, IconYunnan, IconShaanxi, IconGansu, IconQinghai, IconTaiwan, IconInnerMongolia, IconGuangxi, IconTibet, IconNingxia, IconXinjiang, IconHongKong, IconMacau, } from '@/components/icons';
+import { IconProvince } from '@/components/icons';
 var mapStore = useMapStore();
 var provinceData = computed(function () { return mapStore.provinceData.filter(function (item) { return item.selected; }); });
 var cityData = computed(function () { return mapStore.cityData.filter(function (item) { return item.selected; }); });
 var provinceCount = computed(function () { return provinceData.value.length; });
 var cityCount = computed(function () { return cityData.value.length; });
-var provinceIconMap = {
-    '北京市': IconBeijing,
-    '天津市': IconTianjin,
-    '上海市': IconShanghai,
-    '重庆市': IconChongqing,
-    '河北省': IconHebei,
-    '山西省': IconShanxi,
-    '辽宁省': IconLiaoning,
-    '吉林省': IconJilin,
-    '黑龙江省': IconHeilongjiang,
-    '江苏省': IconJiangsu,
-    '浙江省': IconZhejiang,
-    '安徽省': IconAnhui,
-    '福建省': IconFujian,
-    '江西省': IconJiangxi,
-    '山东省': IconShandong,
-    '河南省': IconHenan,
-    '湖北省': IconHubei,
-    '湖南省': IconHunan,
-    '广东省': IconGuangdong,
-    '海南省': IconHainan,
-    '四川省': IconSichuan,
-    '贵州省': IconGuizhou,
-    '云南省': IconYunnan,
-    '陕西省': IconShaanxi,
-    '甘肃省': IconGansu,
-    '青海省': IconQinghai,
-    '台湾省': IconTaiwan,
-    '内蒙古自治区': IconInnerMongolia,
-    '广西壮族自治区': IconGuangxi,
-    '西藏自治区': IconTibet,
-    '宁夏回族自治区': IconNingxia,
-    '新疆维吾尔自治区': IconXinjiang,
-    '香港特别行政区': IconHongKong,
-    '澳门特别行政区': IconMacau,
-};
-var getProvinceIcon = function (name) {
-    return provinceIconMap[name] || IconBeijing;
-};
 debugger; /* PartiallyEnd: #3632/scriptSetup.vue */
 var __VLS_ctx = {};
 var __VLS_elements;
@@ -124,12 +86,13 @@ if (__VLS_ctx.provinceData.length > 0) {
         var __VLS_14 = __VLS_13.slots.default;
         {
             var __VLS_15 = __VLS_13.slots.icon;
-            var __VLS_16 = ((__VLS_ctx.getProvinceIcon(item.name)));
+            var __VLS_16 = {}.IconProvince;
+            /** @type {[typeof __VLS_components.IconProvince, ]} */ ;
             // @ts-ignore
-            var __VLS_17 = __VLS_asFunctionalComponent(__VLS_16, new __VLS_16(__assign({ class: "icon" })));
-            var __VLS_18 = __VLS_17.apply(void 0, __spreadArray([__assign({ class: "icon" })], __VLS_functionalComponentArgsRest(__VLS_17), false));
+            IconProvince;
             // @ts-ignore
-            [getProvinceIcon,];
+            var __VLS_17 = __VLS_asFunctionalComponent(__VLS_16, new __VLS_16(__assign({ provinceName: (item.name), size: (32) }, { class: "icon" })));
+            var __VLS_18 = __VLS_17.apply(void 0, __spreadArray([__assign({ provinceName: (item.name), size: (32) }, { class: "icon" })], __VLS_functionalComponentArgsRest(__VLS_17), false));
         }
         var __VLS_13;
     }
@@ -213,11 +176,11 @@ else {
 var __VLS_dollars;
 var __VLS_self = (await import('vue')).defineComponent({
     setup: function () { return ({
+        IconProvince: IconProvince,
         provinceData: provinceData,
         cityData: cityData,
         provinceCount: provinceCount,
         cityCount: cityCount,
-        getProvinceIcon: getProvinceIcon,
     }); },
 });
 export default (await import('vue')).defineComponent({});

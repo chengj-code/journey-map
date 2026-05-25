@@ -1,3 +1,4 @@
+/// <reference types="../../../node_modules/.vue-global-types/vue_3.5_0.d.ts" />
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -20,44 +21,44 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 var _a;
 import { ref } from 'vue';
-import { IconBeijing, IconTianjin, IconShanghai, IconChongqing, IconHebei, IconShanxi, IconLiaoning, IconJilin, IconHeilongjiang, IconJiangsu, IconZhejiang, IconAnhui, IconFujian, IconJiangxi, IconShandong, IconHenan, IconHubei, IconHunan, IconGuangdong, IconHainan, IconSichuan, IconGuizhou, IconYunnan, IconShaanxi, IconGansu, IconQinghai, IconTaiwan, IconInnerMongolia, IconGuangxi, IconTibet, IconNingxia, IconXinjiang, IconHongKong, IconMacau, } from '@/components/icons';
+import { IconProvince } from '@/components/icons';
 import { useIconStore } from '@/store';
 var iconStore = useIconStore();
 var iconList = [
-    { name: '北京市', label: '北京', component: IconBeijing },
-    { name: '天津市', label: '天津', component: IconTianjin },
-    { name: '上海市', label: '上海', component: IconShanghai },
-    { name: '重庆市', label: '重庆', component: IconChongqing },
-    { name: '河北省', label: '河北', component: IconHebei },
-    { name: '山西省', label: '山西', component: IconShanxi },
-    { name: '辽宁省', label: '辽宁', component: IconLiaoning },
-    { name: '吉林省', label: '吉林', component: IconJilin },
-    { name: '黑龙江省', label: '黑龙江', component: IconHeilongjiang },
-    { name: '江苏省', label: '江苏', component: IconJiangsu },
-    { name: '浙江省', label: '浙江', component: IconZhejiang },
-    { name: '安徽省', label: '安徽', component: IconAnhui },
-    { name: '福建省', label: '福建', component: IconFujian },
-    { name: '江西省', label: '江西', component: IconJiangxi },
-    { name: '山东省', label: '山东', component: IconShandong },
-    { name: '河南省', label: '河南', component: IconHenan },
-    { name: '湖北省', label: '湖北', component: IconHubei },
-    { name: '湖南省', label: '湖南', component: IconHunan },
-    { name: '广东省', label: '广东', component: IconGuangdong },
-    { name: '海南省', label: '海南', component: IconHainan },
-    { name: '四川省', label: '四川', component: IconSichuan },
-    { name: '贵州省', label: '贵州', component: IconGuizhou },
-    { name: '云南省', label: '云南', component: IconYunnan },
-    { name: '陕西省', label: '陕西', component: IconShaanxi },
-    { name: '甘肃省', label: '甘肃', component: IconGansu },
-    { name: '青海省', label: '青海', component: IconQinghai },
-    { name: '台湾省', label: '台湾', component: IconTaiwan },
-    { name: '内蒙古自治区', label: '内蒙古', component: IconInnerMongolia },
-    { name: '广西壮族自治区', label: '广西', component: IconGuangxi },
-    { name: '西藏自治区', label: '西藏', component: IconTibet },
-    { name: '宁夏回族自治区', label: '宁夏', component: IconNingxia },
-    { name: '新疆维吾尔自治区', label: '新疆', component: IconXinjiang },
-    { name: '香港特别行政区', label: '香港', component: IconHongKong },
-    { name: '澳门特别行政区', label: '澳门', component: IconMacau },
+    { name: '北京市', label: '北京' },
+    { name: '天津市', label: '天津' },
+    { name: '上海市', label: '上海' },
+    { name: '重庆市', label: '重庆' },
+    { name: '河北省', label: '河北' },
+    { name: '山西省', label: '山西' },
+    { name: '辽宁省', label: '辽宁' },
+    { name: '吉林省', label: '吉林' },
+    { name: '黑龙江省', label: '黑龙江' },
+    { name: '江苏省', label: '江苏' },
+    { name: '浙江省', label: '浙江' },
+    { name: '安徽省', label: '安徽' },
+    { name: '福建省', label: '福建' },
+    { name: '江西省', label: '江西' },
+    { name: '山东省', label: '山东' },
+    { name: '河南省', label: '河南' },
+    { name: '湖北省', label: '湖北' },
+    { name: '湖南省', label: '湖南' },
+    { name: '广东省', label: '广东' },
+    { name: '海南省', label: '海南' },
+    { name: '四川省', label: '四川' },
+    { name: '贵州省', label: '贵州' },
+    { name: '云南省', label: '云南' },
+    { name: '陕西省', label: '陕西' },
+    { name: '甘肃省', label: '甘肃' },
+    { name: '青海省', label: '青海' },
+    { name: '台湾省', label: '台湾' },
+    { name: '内蒙古自治区', label: '内蒙古' },
+    { name: '广西壮族自治区', label: '广西' },
+    { name: '西藏自治区', label: '西藏' },
+    { name: '宁夏回族自治区', label: '宁夏' },
+    { name: '新疆维吾尔自治区', label: '新疆' },
+    { name: '香港特别行政区', label: '香港' },
+    { name: '澳门特别行政区', label: '澳门' },
 ];
 var showPopup = ref(false);
 var selectedIcon = ref(null);
@@ -108,6 +109,13 @@ var saveConfig = function () {
     }
     showPopup.value = false;
 };
+var resetToDefault = function () {
+    if (selectedIcon.value) {
+        iconStore.resetIconColor(selectedIcon.value.name);
+        tempBgColor.value = '';
+        tempTextColor.value = '';
+    }
+};
 var cancelConfig = function () {
     showPopup.value = false;
 };
@@ -144,14 +152,19 @@ var _loop_1 = function (item) {
             // @ts-ignore
             [openColorPicker,];
         } }, { key: (item.name) }), { class: "icon-card" }));
-    var __VLS_5 = ((item.component));
+    var __VLS_5 = {}.IconProvince;
+    /** @type {[typeof __VLS_components.IconProvince, ]} */ ;
+    // @ts-ignore
+    IconProvince;
     // @ts-ignore
     var __VLS_6 = __VLS_asFunctionalComponent(__VLS_5, new __VLS_5({
+        provinceName: (item.name),
         size: (48),
         backgroundColor: (__VLS_ctx.getBgColor(item.name)),
         textColor: (__VLS_ctx.getTextColor(item.name)),
     }));
     var __VLS_7 = __VLS_6.apply(void 0, __spreadArray([{
+            provinceName: (item.name),
             size: (48),
             backgroundColor: (__VLS_ctx.getBgColor(item.name)),
             textColor: (__VLS_ctx.getTextColor(item.name)),
@@ -199,14 +212,19 @@ __VLS_asFunctionalElement(__VLS_elements.div, __VLS_elements.div)(__assign({ cla
 if (__VLS_ctx.selectedIcon) {
     // @ts-ignore
     [selectedIcon,];
-    var __VLS_23 = ((__VLS_ctx.selectedIcon.component));
+    var __VLS_23 = {}.IconProvince;
+    /** @type {[typeof __VLS_components.IconProvince, ]} */ ;
+    // @ts-ignore
+    IconProvince;
     // @ts-ignore
     var __VLS_24 = __VLS_asFunctionalComponent(__VLS_23, new __VLS_23({
+        provinceName: (__VLS_ctx.selectedIcon.name),
         size: (80),
         backgroundColor: (__VLS_ctx.tempBgColor || undefined),
         textColor: (__VLS_ctx.tempTextColor || undefined),
     }));
     var __VLS_25 = __VLS_24.apply(void 0, __spreadArray([{
+            provinceName: (__VLS_ctx.selectedIcon.name),
             size: (80),
             backgroundColor: (__VLS_ctx.tempBgColor || undefined),
             textColor: (__VLS_ctx.tempTextColor || undefined),
@@ -308,31 +326,46 @@ var __VLS_40 = {}.VanButton;
 // @ts-ignore
 VanButton;
 // @ts-ignore
-var __VLS_41 = __VLS_asFunctionalComponent(__VLS_40, new __VLS_40(__assign({ 'onClick': {} }, { plain: true, type: "default" })));
-var __VLS_42 = __VLS_41.apply(void 0, __spreadArray([__assign({ 'onClick': {} }, { plain: true, type: "default" })], __VLS_functionalComponentArgsRest(__VLS_41), false));
+var __VLS_41 = __VLS_asFunctionalComponent(__VLS_40, new __VLS_40(__assign({ 'onClick': {} }, { plain: true, type: "primary" })));
+var __VLS_42 = __VLS_41.apply(void 0, __spreadArray([__assign({ 'onClick': {} }, { plain: true, type: "primary" })], __VLS_functionalComponentArgsRest(__VLS_41), false));
 var __VLS_44;
 var __VLS_45;
 var __VLS_46 = ({ click: {} },
-    { onClick: (__VLS_ctx.cancelConfig) });
+    { onClick: (__VLS_ctx.resetToDefault) });
 var __VLS_47 = __VLS_43.slots.default;
 // @ts-ignore
-[cancelConfig,];
+[resetToDefault,];
 var __VLS_43;
 var __VLS_48 = {}.VanButton;
 /** @type {[typeof __VLS_components.VanButton, typeof __VLS_components.vanButton, typeof __VLS_components.VanButton, typeof __VLS_components.vanButton, ]} */ ;
 // @ts-ignore
 VanButton;
 // @ts-ignore
-var __VLS_49 = __VLS_asFunctionalComponent(__VLS_48, new __VLS_48(__assign({ 'onClick': {} }, { type: "primary" })));
-var __VLS_50 = __VLS_49.apply(void 0, __spreadArray([__assign({ 'onClick': {} }, { type: "primary" })], __VLS_functionalComponentArgsRest(__VLS_49), false));
+var __VLS_49 = __VLS_asFunctionalComponent(__VLS_48, new __VLS_48(__assign({ 'onClick': {} }, { plain: true })));
+var __VLS_50 = __VLS_49.apply(void 0, __spreadArray([__assign({ 'onClick': {} }, { plain: true })], __VLS_functionalComponentArgsRest(__VLS_49), false));
 var __VLS_52;
 var __VLS_53;
 var __VLS_54 = ({ click: {} },
-    { onClick: (__VLS_ctx.saveConfig) });
+    { onClick: (__VLS_ctx.cancelConfig) });
 var __VLS_55 = __VLS_51.slots.default;
 // @ts-ignore
-[saveConfig,];
+[cancelConfig,];
 var __VLS_51;
+var __VLS_56 = {}.VanButton;
+/** @type {[typeof __VLS_components.VanButton, typeof __VLS_components.vanButton, typeof __VLS_components.VanButton, typeof __VLS_components.vanButton, ]} */ ;
+// @ts-ignore
+VanButton;
+// @ts-ignore
+var __VLS_57 = __VLS_asFunctionalComponent(__VLS_56, new __VLS_56(__assign({ 'onClick': {} }, { type: "primary" })));
+var __VLS_58 = __VLS_57.apply(void 0, __spreadArray([__assign({ 'onClick': {} }, { type: "primary" })], __VLS_functionalComponentArgsRest(__VLS_57), false));
+var __VLS_60;
+var __VLS_61;
+var __VLS_62 = ({ click: {} },
+    { onClick: (__VLS_ctx.saveConfig) });
+var __VLS_63 = __VLS_59.slots.default;
+// @ts-ignore
+[saveConfig,];
+var __VLS_59;
 var __VLS_13;
 /** @type {__VLS_StyleScopedClasses['icon-gallery-page']} */ ;
 /** @type {__VLS_StyleScopedClasses['icon-grid']} */ ;
@@ -358,6 +391,7 @@ var __VLS_13;
 var __VLS_dollars;
 var __VLS_self = (await import('vue')).defineComponent({
     setup: function () { return ({
+        IconProvince: IconProvince,
         iconList: iconList,
         showPopup: showPopup,
         selectedIcon: selectedIcon,
@@ -369,6 +403,7 @@ var __VLS_self = (await import('vue')).defineComponent({
         getTextColor: getTextColor,
         openColorPicker: openColorPicker,
         saveConfig: saveConfig,
+        resetToDefault: resetToDefault,
         cancelConfig: cancelConfig,
     }); },
 });

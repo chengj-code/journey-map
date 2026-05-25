@@ -21,6 +21,10 @@ export const useIconStore = defineStore('icon', {
     getIconColor(provinceName: string): IconColorConfig | null {
       return this.colorConfigs[provinceName] ?? null;
     },
+
+    resetIconColor(provinceName: string) {
+      delete this.colorConfigs[provinceName];
+    },
   },
 
   persist: {
