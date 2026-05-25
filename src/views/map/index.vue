@@ -6,32 +6,36 @@
       @click-left="router.back()"
     />
     
-    <div class="map-content">
-        <div class="control-bar">
-            <div class="mode-select">
-                <van-field v-model="modeValue" is-link readonly label="模式" placeholder="选择模式" @click="showPicker = true" />
-                <van-popup v-model:show="showPicker" destroy-on-close round position="bottom">
-                    <van-picker :model-value="pickerValue" :columns="columns" @cancel="showPicker = false"
-                        @confirm="modeChangeFn" />
-                </van-popup>
-            </div>
+    <div class="map-wrapper">
+      <div class="map-container" id="echarts-container"></div>
+      
+      <div class="float-panel float-top">
+        <div class="mode-chip" @click="showPicker = true">
+          <span class="chip-label">模式</span>
+          <span class="chip-value">{{ modeValue }}</span>
+          <van-icon name="arrow-down" size="12" />
         </div>
-        <div class="w-[100%] map-container">
-            <div class="w-[100%] h-[100%]" id="echarts-container"></div>
-            <div class="reset-btn w-[40px] h-[40px] flex justify-center items-center bg-[#eee] rounded-[20px] absolute bottom-[10px] right-[10px]"
-                @click="resetMap">
-                <van-icon name="revoke" size="24" />
-            </div>
+        <van-popup v-model:show="showPicker" destroy-on-close round position="bottom">
+          <van-picker :model-value="pickerValue" :columns="columns" @cancel="showPicker = false"
+            @confirm="modeChangeFn" />
+        </van-popup>
+      </div>
+
+      <div class="float-panel float-bottom">
+        <div class="area-select-card" @click="show = true">
+          <van-icon name="location-o" size="18" color="#60a5fa" />
+          <span class="area-text">{{ fieldValue || '选择点亮地区' }}</span>
+          <van-icon name="arrow" size="14" color="#9ca3af" />
         </div>
-        <div class="control-bar bottom-bar">
-            <div class="highlight-select">
-                <van-field v-model="fieldValue" is-link readonly label="点亮地区" placeholder="请选择点亮地区" @click="show = true" />
-                <van-popup v-model:show="show" round position="bottom">
-                    <van-cascader v-model="cascaderValue" title="请选择所在地区" :options="cascaderOptions" @close="show = false"
-                        @finish="onFinish" />
-                </van-popup>
-            </div>
-        </div>
+        <van-popup v-model:show="show" round position="bottom">
+          <van-cascader v-model="cascaderValue" title="请选择所在地区" :options="cascaderOptions" @close="show = false"
+            @finish="onFinish" />
+        </van-popup>
+      </div>
+
+      <div class="reset-btn" @click="resetMap">
+        <van-icon name="revoke" size="20" color="#374151" />
+      </div>
     </div>
   </div>
 </template>
@@ -203,41 +207,107 @@ onMounted(() => {
   height: 100vh;
   background-color: #000;
   
-  .map-content {
+  .map-wrapper {
+    position: relative;
+    width: 100%;
     height: calc(100vh - 46px);
-    display: flex;
-    flex-direction: column;
+    overflow: hidden;
+  }
 
-    .control-bar {
-      flex-shrink: 0;
-      padding: 8px 16px;
-      background-color: #111827;
-      border-bottom: 1px solid #1f2937;
+  .map-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 
-      &.bottom-bar {
-        border-bottom: none;
-        border-top: 1px solid #1f2937;
-      }
-    }
-    
-    .map-container {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
+  .float-panel {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    z-index: 10;
+    pointer-events: none;
+
+    > * {
+      pointer-events: auto;
     }
   }
-}
 
-:deep(.mode-select .van-field__label) {
-    width: 30px;
-}
+  .float-top {
+    top: 12px;
+  }
 
-:deep(.highlight-select .van-field__label) {
-    width: 60px;
-}
+  .float-bottom {
+    bottom: 16px;
+  }
 
-:deep(.van-cell) {
-    background-color: transparent;
-    padding: 10px 0;
+  .mode-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    .chip-label {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .chip-value {
+      font-size: 14px;
+      color: #f3f4f6;
+      font-weight: 500;
+    }
+  }
+
+  .area-select-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(17, 24, 39, 0.9);
+    backdrop-filter: blur(12px);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+    .area-text {
+      flex: 1;
+      font-size: 14px;
+      color: #d1d5db;
+
+      &:empty::before {
+        content: '选择点亮地区';
+        color: #6b7280;
+      }
+    }
+  }
+
+  .reset-btn {
+    position: absolute;
+    bottom: 80px;
+    right: 16px;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border-radius: 50%;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:active {
+      transform: scale(0.92);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+    }
+  }
 }
 </style>
