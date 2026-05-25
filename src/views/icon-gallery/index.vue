@@ -9,8 +9,9 @@
         class="icon-card"
         @click="openColorPicker(item)"
       >
-        <component
-          :is="item.component"
+        <IconProvince
+          :provinceName="item.name"
+          :label="item.shortLabel"
           :size="48"
           :backgroundColor="getBgColor(item.name)"
           :textColor="getTextColor(item.name)"
@@ -32,9 +33,10 @@
         </div>
 
         <div class="preview-section">
-          <component
+          <IconProvince
             v-if="selectedIcon"
-            :is="selectedIcon.component"
+            :provinceName="selectedIcon.name"
+            :label="selectedIcon.shortLabel"
             :size="80"
             :backgroundColor="tempBgColor || undefined"
             :textColor="tempTextColor || undefined"
@@ -103,6 +105,7 @@
 
         <div class="popup-actions">
           <van-button plain type="default" @click="cancelConfig">取消</van-button>
+          <van-button plain type="warning" @click="resetConfig">重置</van-button>
           <van-button type="primary" @click="saveConfig">保存</van-button>
         </div>
       </div>
@@ -112,87 +115,52 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import {
-  IconBeijing,
-  IconTianjin,
-  IconShanghai,
-  IconChongqing,
-  IconHebei,
-  IconShanxi,
-  IconLiaoning,
-  IconJilin,
-  IconHeilongjiang,
-  IconJiangsu,
-  IconZhejiang,
-  IconAnhui,
-  IconFujian,
-  IconJiangxi,
-  IconShandong,
-  IconHenan,
-  IconHubei,
-  IconHunan,
-  IconGuangdong,
-  IconHainan,
-  IconSichuan,
-  IconGuizhou,
-  IconYunnan,
-  IconShaanxi,
-  IconGansu,
-  IconQinghai,
-  IconTaiwan,
-  IconInnerMongolia,
-  IconGuangxi,
-  IconTibet,
-  IconNingxia,
-  IconXinjiang,
-  IconHongKong,
-  IconMacau,
-} from '@/components/icons'
+import { IconProvince } from '@/components/icons'
 import { useIconStore } from '@/store'
 
 interface IconItem {
   name: string
   label: string
-  component: any
+  shortLabel: string
 }
 
 const iconStore = useIconStore()
 
 const iconList: IconItem[] = [
-  { name: '北京市', label: '北京', component: IconBeijing },
-  { name: '天津市', label: '天津', component: IconTianjin },
-  { name: '上海市', label: '上海', component: IconShanghai },
-  { name: '重庆市', label: '重庆', component: IconChongqing },
-  { name: '河北省', label: '河北', component: IconHebei },
-  { name: '山西省', label: '山西', component: IconShanxi },
-  { name: '辽宁省', label: '辽宁', component: IconLiaoning },
-  { name: '吉林省', label: '吉林', component: IconJilin },
-  { name: '黑龙江省', label: '黑龙江', component: IconHeilongjiang },
-  { name: '江苏省', label: '江苏', component: IconJiangsu },
-  { name: '浙江省', label: '浙江', component: IconZhejiang },
-  { name: '安徽省', label: '安徽', component: IconAnhui },
-  { name: '福建省', label: '福建', component: IconFujian },
-  { name: '江西省', label: '江西', component: IconJiangxi },
-  { name: '山东省', label: '山东', component: IconShandong },
-  { name: '河南省', label: '河南', component: IconHenan },
-  { name: '湖北省', label: '湖北', component: IconHubei },
-  { name: '湖南省', label: '湖南', component: IconHunan },
-  { name: '广东省', label: '广东', component: IconGuangdong },
-  { name: '海南省', label: '海南', component: IconHainan },
-  { name: '四川省', label: '四川', component: IconSichuan },
-  { name: '贵州省', label: '贵州', component: IconGuizhou },
-  { name: '云南省', label: '云南', component: IconYunnan },
-  { name: '陕西省', label: '陕西', component: IconShaanxi },
-  { name: '甘肃省', label: '甘肃', component: IconGansu },
-  { name: '青海省', label: '青海', component: IconQinghai },
-  { name: '台湾省', label: '台湾', component: IconTaiwan },
-  { name: '内蒙古自治区', label: '内蒙古', component: IconInnerMongolia },
-  { name: '广西壮族自治区', label: '广西', component: IconGuangxi },
-  { name: '西藏自治区', label: '西藏', component: IconTibet },
-  { name: '宁夏回族自治区', label: '宁夏', component: IconNingxia },
-  { name: '新疆维吾尔自治区', label: '新疆', component: IconXinjiang },
-  { name: '香港特别行政区', label: '香港', component: IconHongKong },
-  { name: '澳门特别行政区', label: '澳门', component: IconMacau },
+  { name: '北京市', label: '北京', shortLabel: '京' },
+  { name: '天津市', label: '天津', shortLabel: '津' },
+  { name: '上海市', label: '上海', shortLabel: '沪' },
+  { name: '重庆市', label: '重庆', shortLabel: '渝' },
+  { name: '河北省', label: '河北', shortLabel: '冀' },
+  { name: '山西省', label: '山西', shortLabel: '晋' },
+  { name: '辽宁省', label: '辽宁', shortLabel: '辽' },
+  { name: '吉林省', label: '吉林', shortLabel: '吉' },
+  { name: '黑龙江省', label: '黑龙江', shortLabel: '黑' },
+  { name: '江苏省', label: '江苏', shortLabel: '苏' },
+  { name: '浙江省', label: '浙江', shortLabel: '浙' },
+  { name: '安徽省', label: '安徽', shortLabel: '皖' },
+  { name: '福建省', label: '福建', shortLabel: '闽' },
+  { name: '江西省', label: '江西', shortLabel: '赣' },
+  { name: '山东省', label: '山东', shortLabel: '鲁' },
+  { name: '河南省', label: '河南', shortLabel: '豫' },
+  { name: '湖北省', label: '湖北', shortLabel: '鄂' },
+  { name: '湖南省', label: '湖南', shortLabel: '湘' },
+  { name: '广东省', label: '广东', shortLabel: '粤' },
+  { name: '海南省', label: '海南', shortLabel: '琼' },
+  { name: '四川省', label: '四川', shortLabel: '川' },
+  { name: '贵州省', label: '贵州', shortLabel: '黔' },
+  { name: '云南省', label: '云南', shortLabel: '滇' },
+  { name: '陕西省', label: '陕西', shortLabel: '陕' },
+  { name: '甘肃省', label: '甘肃', shortLabel: '甘' },
+  { name: '青海省', label: '青海', shortLabel: '青' },
+  { name: '台湾省', label: '台湾', shortLabel: '台' },
+  { name: '内蒙古自治区', label: '内蒙古', shortLabel: '蒙' },
+  { name: '广西壮族自治区', label: '广西', shortLabel: '桂' },
+  { name: '西藏自治区', label: '西藏', shortLabel: '藏' },
+  { name: '宁夏回族自治区', label: '宁夏', shortLabel: '宁' },
+  { name: '新疆维吾尔自治区', label: '新疆', shortLabel: '新' },
+  { name: '香港特别行政区', label: '香港', shortLabel: '港' },
+  { name: '澳门特别行政区', label: '澳门', shortLabel: '澳' },
 ]
 
 const showPopup = ref(false)
@@ -257,6 +225,14 @@ const saveConfig = () => {
 
 const cancelConfig = () => {
   showPopup.value = false
+}
+
+const resetConfig = () => {
+  if (selectedIcon.value) {
+    iconStore.resetIconColor(selectedIcon.value.name)
+    tempBgColor.value = ''
+    tempTextColor.value = ''
+  }
 }
 </script>
 

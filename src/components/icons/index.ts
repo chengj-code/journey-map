@@ -1,3 +1,4 @@
+export { default as IconProvince } from './IconProvince.vue'
 export { default as IconBeijing } from './IconBeijing.vue'
 export { default as IconTianjin } from './IconTianjin.vue'
 export { default as IconShanghai } from './IconShanghai.vue'
