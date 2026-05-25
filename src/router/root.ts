@@ -55,4 +55,12 @@ export default [
             title: '注册',
         },
     },
+    {
+        path: '/map',
+        name: 'map',
+        component: () => import('@/views/map/index.vue'),
+        meta: {
+            title: '足迹地图',
+        },
+    },
 ];
