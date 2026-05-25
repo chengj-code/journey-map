@@ -226,7 +226,7 @@ onMounted(() => {
     position: absolute;
     left: 12px;
     right: 12px;
-    z-index: 10;
+    z-index: 1;
     pointer-events: none;
 
     > * {
@@ -291,7 +291,7 @@ onMounted(() => {
     position: absolute;
     bottom: 80px;
     right: 16px;
-    z-index: 10;
+    z-index: 1;
     width: 40px;
     height: 40px;
     display: flex;
