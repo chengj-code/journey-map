@@ -177,8 +177,12 @@ function getCityProvinceName(item: { fullName?: string; name: string }): string 
     font-weight: 600;
     color: #fff;
     background: #10B981;
-    padding: 2px 8px;
-    border-radius: 10px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
