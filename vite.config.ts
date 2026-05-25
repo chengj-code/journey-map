@@ -2,33 +2,66 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import Components from 'unplugin-vue-components/vite';
-import { VantResolver } from 'unplugin-vue-components/resolvers'; // 引入 Vant 的解析器
-import tailwindcss from '@tailwindcss/vite' // 导入插件
+import { VantResolver } from 'unplugin-vue-components/resolvers';
+import tailwindcss from '@tailwindcss/vite';
+
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [
         vue(),
         tailwindcss(),
         Components({
-            resolvers: [VantResolver()], // 使用 Vant 的解析器
+            resolvers: [VantResolver()],
+            // 禁止生成 .vue.js 文件
+            dts: false,
         }),
     ],
+    
+    // 构建输出配置 - 确保只输出到 dist 目录
+    build: {
+        outDir: 'dist',
+        // 清理旧的构建产物
+        emptyOutDir: true,
+    },
+    
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './src'), // 将 '@' 指向 src 目录
+            '@': path.resolve(__dirname, './src'),
+        },
+        // 强制解析扩展名，优先使用 .ts
+        extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
+    },
+    
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        open: false,
+        allowedHosts: true,
+        
+        // 开发服务器优化
+        fs: {
+            // 限制访问范围，防止访问不应该的文件
+            strict: true,
         },
     },
-    server: {
-        host: '0.0.0.0', // 监听所有网络接口
-        port: 5173,       // 设置服务端口号
-        open: false,      // 禁止自动打开浏览器（避免 CI 环境错误）
-        allowedHosts: true, // 允许所有主机访问
-    },
+    
     css: {
         preprocessorOptions: {
             less: {
-                javascriptEnabled: true, // 开启 JavaScript 支持，例如使用 mixins
+                javascriptEnabled: true,
             },
         },
+    },
+    
+    // 优化依赖预构建
+    optimizeDeps: {
+        // 排除不需要预构建的包
+        exclude: [],
+    },
+    
+    // ESBuild 配置
+    esbuild: {
+        // 确保 JSX/TSX 转换正确
+        jsx: 'transform',
     },
 });

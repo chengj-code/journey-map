@@ -7,7 +7,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    
+    // 🛡️ .js 文件检查和清理脚本
+    "check:js": "node scripts/check-js-files.cjs",
+    "clean:js": "node scripts/clean-js-files.cjs",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@vant/area-data": "^2.1.0",
