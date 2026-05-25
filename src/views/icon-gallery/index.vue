@@ -115,7 +115,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { IconProvince, DEFAULT_COLORS } from '@/components/icons'
+import { IconProvince } from '@/components/icons'
+import { DEFAULT_COLORS } from '@/components/icons/defaultColors'
 import { useIconStore } from '@/store'
 
 interface IconItem {
