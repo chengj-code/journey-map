@@ -38,8 +38,22 @@
   - [x] 阴影系统应用（三级层次）
   - [x] 字体层级清晰（标题/数字/正文/辅助）
 
+- [x] Task 6: 统计页面现代化重设计
+  - [x] 重写 `src/views/statistics/index.vue`
+  - [x] 添加页面导航栏（返回按钮 + 标题"点亮统计"）
+  - [x] 实现统计概览卡片（深色渐变背景 + 总数 + 省市分布）
+  - [x] 实现可折叠面板（van-collapse + van-collapse-item）
+  - [x] 省级点亮面板：默认收起，点击展开显示列表
+  - [x] 市级点亮面板：默认收起，点击展开显示列表
+  - [x] 省级列表项使用 IconProvince 组件显示 SVG 图标
+  - [x] 市级列表项从 fullName 解析省份名 → IconProvince 图标
+  - [x] 市级显示完整路径（省/市）而非仅市名
+  - [x] 清理旧的 34 个独立 icon 组件 import，统一用 IconProvince
+  - [x] 空状态处理（van-empty 提示）
+
 # Task Dependencies
 - [Task 2] depends on [] (可与 Task 1 并行) ✅
 - [Task 3] depends on [] ✅
 - [Task 4] depends on [Task 1, Task 2] ✅
 - [Task 5] depends on [] (可与任何任务并行) ✅
+- [Task 6] depends on [] ✅
