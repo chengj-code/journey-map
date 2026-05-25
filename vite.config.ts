@@ -19,9 +19,10 @@ export default defineConfig({
         },
     },
     server: {
-        // 可选：配置开发服务器
-        // port: 3000, // 设置服务端口号
-        open: true, // 服务启动后自动打开浏览器
+        host: '0.0.0.0', // 监听所有网络接口
+        port: 5173,       // 设置服务端口号
+        open: false,      // 禁止自动打开浏览器（避免 CI 环境错误）
+        allowedHosts: true, // 允许所有主机访问
     },
     css: {
         preprocessorOptions: {
