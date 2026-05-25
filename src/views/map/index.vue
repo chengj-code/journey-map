@@ -9,7 +9,7 @@
     <div class="map-wrapper">
       <div class="map-container" id="echarts-container"></div>
       
-      <div v-show="!showPicker" class="float-panel float-top">
+      <div class="float-panel float-top">
         <div class="mode-chip" @click="showPicker = true">
           <span class="chip-label">模式</span>
           <span class="chip-value">{{ modeValue }}</span>
@@ -21,7 +21,7 @@
         </van-popup>
       </div>
 
-      <div v-show="!show && !showPicker" class="float-panel float-bottom">
+      <div class="float-panel float-bottom">
         <div class="area-select-card" @click="show = true">
           <van-icon name="location-o" size="18" color="#60a5fa" />
           <span class="area-text">{{ fieldValue || '选择点亮地区' }}</span>
@@ -33,7 +33,7 @@
         </van-popup>
       </div>
 
-      <div v-show="!show && !showPicker" class="reset-btn" @click="resetMap">
+      <div class="reset-btn" @click="resetMap">
         <van-icon name="revoke" size="20" color="#374151" />
       </div>
     </div>
@@ -211,7 +211,6 @@ onMounted(() => {
     position: relative;
     width: 100%;
     height: calc(100vh - 46px);
-    overflow: hidden;
   }
 
   .map-container {
@@ -226,8 +225,6 @@ onMounted(() => {
     position: absolute;
     left: 12px;
     right: 12px;
-    z-index: 1;
-    pointer-events: none;
 
     > * {
       pointer-events: auto;
@@ -247,10 +244,9 @@ onMounted(() => {
     align-items: center;
     gap: 8px;
     padding: 8px 14px;
-    background: rgba(17, 24, 39, 0.85);
-    backdrop-filter: blur(12px);
+    background: rgba(17, 24, 39, 0.9);
     border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 
     .chip-label {
       font-size: 13px;
@@ -269,21 +265,15 @@ onMounted(() => {
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
-    background: rgba(17, 24, 39, 0.9);
-    backdrop-filter: blur(12px);
+    background: rgba(17, 24, 39, 0.92);
     border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 
     .area-text {
       flex: 1;
       font-size: 14px;
       color: #d1d5db;
-
-      &:empty::before {
-        content: '选择点亮地区';
-        color: #6b7280;
-      }
     }
   }
 
@@ -291,14 +281,12 @@ onMounted(() => {
     position: absolute;
     bottom: 80px;
     right: 16px;
-    z-index: 1;
     width: 40px;
     height: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(8px);
     border-radius: 50%;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
     cursor: pointer;
