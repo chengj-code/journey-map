@@ -52,7 +52,9 @@ const show = ref(false);
 const fieldValue = ref('');
 const cascaderValue = ref('');
 const rawOptions = useCascaderAreaData();
-rawOptions.forEach(a => {
+// 创建完整选项副本（保留所有层级，用于市级模式）
+const fullOptions = JSON.parse(JSON.stringify(rawOptions));
+fullOptions.forEach(a => {
     a.children?.forEach(b => {
         // 四个直辖市和两个特别行政区不需要删除children属性
         if (!["北京市", "天津市", "上海市", "重庆市", "香港特别行政区", "澳门特别行政区"].includes(a.text)) {
@@ -69,7 +71,7 @@ const cascaderOptions = computed(() => {
     }))
   }
   // 市级模式：返回完整的三级联动数据（保留原有的特殊处理逻辑）
-  return rawOptions
+  return fullOptions
 })
 const onFinish = ({ selectedOptions }) => {
     show.value = false;
