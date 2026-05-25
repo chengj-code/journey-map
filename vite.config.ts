@@ -43,6 +43,12 @@ export default defineConfig({
             // 限制访问范围，防止访问不应该的文件
             strict: true,
         },
+        
+        // 使用 polling 模式避免 ENOSPC 错误
+        watch: {
+            usePolling: true,
+            interval: 1000,
+        },
     },
     
     css: {
