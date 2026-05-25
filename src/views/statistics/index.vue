@@ -1,181 +1,218 @@
 <template>
-  <div class="statistics-page bg-[#f5f5f5] h-[100%] overflow-y-auto">
-    <van-nav-bar title="点亮统计" />
+  <div class="statistics-page">
+    <van-nav-bar
+      title="点亮统计"
+      left-arrow
+      @click-left="router.back()"
+    />
 
-    <div class="section">
-      <div class="section-title">省级点亮 ({{ provinceCount }})</div>
-      <van-cell-group v-if="provinceData.length > 0" inset>
-        <van-cell
-          v-for="(item, index) in provinceData"
-          :key="index"
-          :title="item.name"
-        >
-          <template #icon>
-            <component :is="getProvinceIcon(item.name)" class="icon" />
+    <div class="page-content">
+      <div class="stats-overview">
+        <div class="overview-icon">📊</div>
+        <div class="overview-info">
+          <div class="overview-total">{{ totalVisited }}</div>
+          <div class="overview-sub">省级 {{ provinceCount }} · 市级 {{ cityCount }}</div>
+        </div>
+      </div>
+
+      <van-collapse v-model="activeNames" class="stats-collapse">
+        <van-collapse-item name="province">
+          <template #title>
+            <div class="collapse-header">
+              <span class="collapse-title">省级点亮</span>
+              <span class="collapse-badge">{{ provinceCount }}</span>
+            </div>
           </template>
-        </van-cell>
-      </van-cell-group>
-      <van-empty v-else description="暂无省级点亮数据" />
-    </div>
+          <div v-if="provinceData.length > 0" class="item-list">
+            <div
+              v-for="(item, index) in provinceData"
+              :key="'p-' + index"
+              class="stat-item"
+            >
+              <IconProvince
+                :province-name="item.name"
+                :label="item.name.slice(0, 1)"
+                :size="36"
+              />
+              <span class="item-name">{{ item.name }}</span>
+            </div>
+          </div>
+          <van-empty v-else description="暂无省级点亮数据" :image-size="60" />
+        </van-collapse-item>
 
-    <div class="section">
-      <div class="section-title">市级点亮 ({{ cityCount }})</div>
-      <van-cell-group v-if="cityData.length > 0" inset>
-        <van-cell
-          v-for="(item, index) in cityData"
-          :key="index"
-          :title="item.fullName || item.name"
-        />
-      </van-cell-group>
-      <van-empty v-else description="暂无市级点亮数据" />
+        <van-collapse-item name="city">
+          <template #title>
+            <div class="collapse-header">
+              <span class="collapse-title">市级点亮</span>
+              <span class="collapse-badge">{{ cityCount }}</span>
+            </div>
+          </template>
+          <div v-if="cityData.length > 0" class="item-list">
+            <div
+              v-for="(item, index) in cityData"
+              :key="'c-' + index"
+              class="stat-item"
+            >
+              <IconProvince
+                :province-name="getCityProvinceName(item)"
+                :label="(item.fullName || item.name).slice(0, 1)"
+                :size="36"
+              />
+              <span class="item-name">{{ item.fullName || item.name }}</span>
+            </div>
+          </div>
+          <van-empty v-else description="暂无市级点亮数据" :image-size="60" />
+        </van-collapse-item>
+      </van-collapse>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { Component } from 'vue'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useMapStore } from '@/store'
-import {
-  IconBeijing,
-  IconTianjin,
-  IconShanghai,
-  IconChongqing,
-  IconHebei,
-  IconShanxi,
-  IconLiaoning,
-  IconJilin,
-  IconHeilongjiang,
-  IconJiangsu,
-  IconZhejiang,
-  IconAnhui,
-  IconFujian,
-  IconJiangxi,
-  IconShandong,
-  IconHenan,
-  IconHubei,
-  IconHunan,
-  IconGuangdong,
-  IconHainan,
-  IconSichuan,
-  IconGuizhou,
-  IconYunnan,
-  IconShaanxi,
-  IconGansu,
-  IconQinghai,
-  IconTaiwan,
-  IconInnerMongolia,
-  IconGuangxi,
-  IconTibet,
-  IconNingxia,
-  IconXinjiang,
-  IconHongKong,
-  IconMacau,
-} from '@/components/icons'
+import { IconProvince } from '@/components/icons'
 
+const router = useRouter()
 const mapStore = useMapStore()
+const activeNames = ref<string[]>([])
 
 const provinceData = computed(() => mapStore.provinceData.filter(item => item.selected))
 const cityData = computed(() => mapStore.cityData.filter(item => item.selected))
-
 const provinceCount = computed(() => provinceData.value.length)
 const cityCount = computed(() => cityData.value.length)
+const totalVisited = computed(() => provinceCount.value + cityCount.value)
 
-const provinceIconMap: Record<string, Component> = {
-  '北京市': IconBeijing,
-  '天津市': IconTianjin,
-  '上海市': IconShanghai,
-  '重庆市': IconChongqing,
-  '河北省': IconHebei,
-  '山西省': IconShanxi,
-  '辽宁省': IconLiaoning,
-  '吉林省': IconJilin,
-  '黑龙江省': IconHeilongjiang,
-  '江苏省': IconJiangsu,
-  '浙江省': IconZhejiang,
-  '安徽省': IconAnhui,
-  '福建省': IconFujian,
-  '江西省': IconJiangxi,
-  '山东省': IconShandong,
-  '河南省': IconHenan,
-  '湖北省': IconHubei,
-  '湖南省': IconHunan,
-  '广东省': IconGuangdong,
-  '海南省': IconHainan,
-  '四川省': IconSichuan,
-  '贵州省': IconGuizhou,
-  '云南省': IconYunnan,
-  '陕西省': IconShaanxi,
-  '甘肃省': IconGansu,
-  '青海省': IconQinghai,
-  '台湾省': IconTaiwan,
-  '内蒙古自治区': IconInnerMongolia,
-  '广西壮族自治区': IconGuangxi,
-  '西藏自治区': IconTibet,
-  '宁夏回族自治区': IconNingxia,
-  '新疆维吾尔自治区': IconXinjiang,
-  '香港特别行政区': IconHongKong,
-  '澳门特别行政区': IconMacau,
-}
-
-const getProvinceIcon = (name: string): Component => {
-  return provinceIconMap[name] || IconBeijing
+function getCityProvinceName(item: { fullName?: string; name: string }): string {
+  const fullName = item.fullName || item.name
+  return fullName.split('/')[0] || item.name
 }
 </script>
 
 <style scoped lang="less">
 .statistics-page {
-  padding-bottom: 20px;
+  min-height: 100vh;
+  background: #F8FAFC;
 }
 
-.section {
-  margin: 16px 0;
+.page-content {
+  padding: 16px;
+}
 
-  .section-title {
-    padding: 12px 16px;
-    font-size: 16px;
-    font-weight: 600;
-    color: #323233;
-    background-color: #fff;
-    border-bottom: 1px solid #ebedf0;
+.stats-overview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 50%, #134E4A 100%);
+  border-radius: 16px;
+  color: white;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+  margin-bottom: 20px;
+
+  .overview-icon {
+    font-size: 32px;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
   }
 
-  .icon {
-    width: 32px;
-    height: 32px;
-    margin-right: 12px;
-    flex-shrink: 0;
+  .overview-info {
+    .overview-total {
+      font-size: 32px;
+      font-weight: 700;
+      color: #10B981;
+      line-height: 1.2;
+    }
+
+    .overview-sub {
+      font-size: 13px;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+  }
+}
+
+.stats-collapse {
+  :deep(.van-collapse-item) {
+    margin-bottom: 12px;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+
+    .van-collapse-item__title {
+      padding: 14px 16px;
+      background: #fff;
+    }
+
+    .van-collapse-item__content {
+      padding: 0;
+      background: #FAFBFC;
+    }
+
+    .van-cell::after {
+      display: none;
+    }
+  }
+}
+
+.collapse-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .collapse-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1E293B;
+  }
+
+  .collapse-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: #10B981;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+}
+
+.item-list {
+  padding: 8px 0;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+
+  &:active {
+    background: #F1F5F9;
+  }
+
+  .item-name {
+    font-size: 14px;
+    color: #334155;
+    font-weight: 500;
   }
 }
 
 :deep(.van-nav-bar) {
-  background-color: #fff;
+  background: #fff;
 }
 
 :deep(.van-nav-bar__title) {
-  color: #323233;
+  color: #1E293B;
   font-weight: 600;
 }
 
-:deep(.van-cell) {
-  align-items: center;
-  padding: 12px 16px;
-
-  .van-cell__title {
-    font-size: 14px;
-    color: #323233;
-  }
-}
-
 :deep(.van-empty) {
-  padding: 40px 0;
-  background-color: #fff;
-  margin-top: 8px;
-}
-
-:deep(.van-cell-group--inset) {
-  margin: 0 16px;
-  border-radius: 8px;
-  overflow: hidden;
+  padding: 28px 0;
 }
 </style>
