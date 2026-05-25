@@ -1,6 +1,10 @@
 <template>
   <div class="icon-gallery-page">
-    <van-nav-bar title="省份图标库" />
+    <van-nav-bar
+      title="省份图标库"
+      left-arrow
+      @click-left="router.back()"
+    />
 
     <div class="icon-grid">
       <div
@@ -115,17 +119,19 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { IconProvince } from '@/components/icons'
 import { DEFAULT_COLORS } from '@/components/icons/defaultColors'
 import { useIconStore } from '@/store'
+
+const router = useRouter()
+const iconStore = useIconStore()
 
 interface IconItem {
   name: string
   label: string
   shortLabel: string
 }
-
-const iconStore = useIconStore()
 
 const iconList: IconItem[] = [
   { name: '北京市', label: '北京', shortLabel: '京' },
