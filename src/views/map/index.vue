@@ -224,7 +224,6 @@ onMounted(() => {
   .float-panel {
     position: absolute;
     left: 12px;
-    right: 12px;
 
     > * {
       pointer-events: auto;
