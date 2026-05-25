@@ -63,4 +63,12 @@ export default [
             title: '足迹地图',
         },
     },
+    {
+        path: '/icon-gallery',
+        name: 'iconGallery',
+        component: () => import('@/views/icon-gallery/index.vue'),
+        meta: {
+            title: '图标库',
+        },
+    },
 ];
