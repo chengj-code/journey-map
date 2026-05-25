@@ -115,7 +115,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { IconProvince } from '@/components/icons'
+import { IconProvince, DEFAULT_COLORS } from '@/components/icons'
 import { useIconStore } from '@/store'
 
 interface IconItem {
@@ -207,8 +207,10 @@ const getTextColor = (name: string) => {
 const openColorPicker = (item: IconItem) => {
   selectedIcon.value = item
   const config = iconStore.getIconColor(item.name)
-  tempBgColor.value = config?.backgroundColor || ''
-  tempTextColor.value = config?.textColor || ''
+  // 如果有保存的自定义颜色则使用，否则使用默认马卡龙配色
+  const defaultColors = DEFAULT_COLORS[item.name]
+  tempBgColor.value = config?.backgroundColor || defaultColors?.bg || '#A8D8EA'
+  tempTextColor.value = config?.textColor || defaultColors?.text || '#ffffff'
   showPopup.value = true
 }
 
@@ -230,8 +232,11 @@ const cancelConfig = () => {
 const resetConfig = () => {
   if (selectedIcon.value) {
     iconStore.resetIconColor(selectedIcon.value.name)
-    tempBgColor.value = ''
-    tempTextColor.value = ''
+    
+    // 更新临时状态为默认颜色（而非空字符串）
+    const defaultColors = DEFAULT_COLORS[selectedIcon.value.name]
+    tempBgColor.value = defaultColors?.bg || '#A8D8EA'
+    tempTextColor.value = defaultColors?.text || '#ffffff'
   }
 }
 </script>

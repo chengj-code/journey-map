@@ -75,6 +75,9 @@ const DEFAULT_COLORS: Record<string, { bg: string; text: string }> = {
   '澳门特别行政区': { bg: '#FFF59D', text: '#F57F17' },
 }
 
+// 导出默认颜色配置供其他组件使用
+export { DEFAULT_COLORS }
+
 const finalBgColor = computed(() => {
   return props.backgroundColor || DEFAULT_COLORS[props.provinceName]?.bg || '#E0E0E0'
 })
