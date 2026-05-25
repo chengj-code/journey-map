@@ -30,6 +30,7 @@ declare module 'vue' {
     IconLiaoning: typeof import('./src/components/icons/IconLiaoning.vue')['default']
     IconMacau: typeof import('./src/components/icons/IconMacau.vue')['default']
     IconNingxia: typeof import('./src/components/icons/IconNingxia.vue')['default']
+    IconProvince: typeof import('./src/components/icons/IconProvince.vue')['default']
     IconQinghai: typeof import('./src/components/icons/IconQinghai.vue')['default']
     IconShaanxi: typeof import('./src/components/icons/IconShaanxi.vue')['default']
     IconShandong: typeof import('./src/components/icons/IconShandong.vue')['default']
