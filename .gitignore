@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vue SFC compiled output (should not be committed)
+*.vue.js
