@@ -201,6 +201,18 @@ const presetTextColors = [
   '#dfe6e9',
 ]
 
+function normalizeColor(color: string): string {
+  if (!color) return color
+  const hex = color.replace('#', '')
+  if (hex.length === 3) {
+    return '#' + hex.split('').map(c => c + c).join('')
+  }
+  if (hex.length === 6 || hex.length === 8) {
+    return '#' + hex
+  }
+  return color
+}
+
 const getBgColor = (name: string) => {
   const config = iconStore.getIconColor(name)
   return config?.backgroundColor || undefined
@@ -214,10 +226,9 @@ const getTextColor = (name: string) => {
 const openColorPicker = (item: IconItem) => {
   selectedIcon.value = item
   const config = iconStore.getIconColor(item.name)
-  // 如果有保存的自定义颜色则使用，否则使用默认马卡龙配色
   const defaultColors = DEFAULT_COLORS[item.name]
-  tempBgColor.value = config?.backgroundColor || defaultColors?.bg || '#A8D8EA'
-  tempTextColor.value = config?.textColor || defaultColors?.text || '#ffffff'
+  tempBgColor.value = normalizeColor(config?.backgroundColor || defaultColors?.bg || '#A8D8EA')
+  tempTextColor.value = normalizeColor(config?.textColor || defaultColors?.text || '#ffffff')
   showPopup.value = true
 }
 
@@ -225,8 +236,8 @@ const saveConfig = () => {
   if (selectedIcon.value && tempBgColor.value && tempTextColor.value) {
     iconStore.setIconColor(
       selectedIcon.value.name,
-      tempBgColor.value,
-      tempTextColor.value
+      normalizeColor(tempBgColor.value),
+      normalizeColor(tempTextColor.value)
     )
   }
   showPopup.value = false
@@ -239,11 +250,10 @@ const cancelConfig = () => {
 const resetConfig = () => {
   if (selectedIcon.value) {
     iconStore.resetIconColor(selectedIcon.value.name)
-    
-    // 更新临时状态为默认颜色（而非空字符串）
+
     const defaultColors = DEFAULT_COLORS[selectedIcon.value.name]
-    tempBgColor.value = defaultColors?.bg || '#A8D8EA'
-    tempTextColor.value = defaultColors?.text || '#ffffff'
+    tempBgColor.value = normalizeColor(defaultColors?.bg || '#A8D8EA')
+    tempTextColor.value = normalizeColor(defaultColors?.text || '#ffffff')
   }
 }
 </script>

@@ -1,7 +1,7 @@
 // 省级行政区默认马卡龙配色方案
 export const DEFAULT_COLORS: Record<string, { bg: string; text: string }> = {
   // 4个直辖市
-  '北京市': { bg: '#A8D8EA', text: '#fff' },
+  '北京市': { bg: '#A8D8EA', text: '#ffffff' },
   '天津市': { bg: '#FFCDD2', text: '#5D4037' },
   '上海市': { bg: '#E1BEE7', text: '#4A148C' },
   '重庆市': { bg: '#B2EBF2', text: '#006064' },
