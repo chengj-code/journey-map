@@ -33,6 +33,14 @@ export default [
     },
     {
         path: '/',
+        name: 'statistics',
+        component: () => import('@/views/statistics/index.vue'),
+        meta: {
+            title: '点亮统计',
+        },
+    },
+    {
+        path: '/',
         name: 'rename',
         component: () => import('@/views/login/rename.vue'),
         meta: {
@@ -45,6 +53,22 @@ export default [
         component: () => import('@/views/login/register.vue'),
         meta: {
             title: '注册',
+        },
+    },
+    {
+        path: '/map',
+        name: 'map',
+        component: () => import('@/views/map/index.vue'),
+        meta: {
+            title: '足迹地图',
+        },
+    },
+    {
+        path: '/icon-gallery',
+        name: 'iconGallery',
+        component: () => import('@/views/icon-gallery/index.vue'),
+        meta: {
+            title: '图标库',
         },
     },
 ];

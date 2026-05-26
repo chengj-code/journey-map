@@ -1,173 +1,442 @@
 <template>
-    <div class="h-[100%] bg-blue-50">
-        <div class="w-[50%] mode-select">
-            <van-field v-model="modeValue" is-link readonly label="模式" placeholder="选择模式" @click="showPicker = true" />
-            <van-popup v-model:show="showPicker" destroy-on-close round position="bottom">
-                <van-picker :model-value="pickerValue" :columns="columns" @cancel="showPicker = false"
-                    @confirm="modeChangeFn" />
-            </van-popup>
+  <div class="home-page bg-[#F8FAFC] min-h-screen pb-6">
+    <header class="nav-bar">
+      <div class="nav-content">
+        <h1 class="nav-title">
+          <span class="nav-icon">🗺️</span>
+          足迹地图
+        </h1>
+        <div class="nav-actions">
+          <button class="nav-btn" @click="handleSearch">
+            <span class="action-icon">🔍</span>
+          </button>
+          <button class="nav-btn" @click="handleNotification">
+            <span class="action-icon">🔔</span>
+          </button>
         </div>
-        <div class="w-[100%] h-[70%] relative">
-            <div class="w-[100%] h-[100%]" id="echarts-container"></div>
-            <div class="reset-btn w-[40px] h-[40px] flex justify-center items-center bg-[#eee] rounded-[20px] absolute bottom-[10px] right-[10px]"
-                @click="resetMap">
-                <van-icon name="revoke" size="24" />
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="hero-card" @click="goToMap">
+        <div class="hero-header">
+          <span class="hero-title">📍 我的足迹</span>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-number">{{ totalVisited }}</div>
+          <div class="stat-subtitle">省级 {{ provinceCount }} · 市级 {{ cityCount }}</div>
+        </div>
+        <button class="cta-button">
+          查看地图 →
+        </button>
+      </section>
+
+      <section class="quick-actions">
+        <div
+          v-for="action in quickActions"
+          :key="action.name"
+          class="action-card"
+          @click="navigateTo(action.path)"
+        >
+          <div class="action-icon-wrapper">
+            <span class="action-icon-large">{{ action.icon }}</span>
+          </div>
+          <span class="action-name">{{ action.name }}</span>
+        </div>
+      </section>
+
+      <section class="recent-section">
+        <div class="section-header">
+          <h2 class="section-title">最近点亮</h2>
+          <span class="view-all" @click="goToStatistics">查看全部 ></span>
+        </div>
+
+        <div v-if="recentItems.length > 0" class="recent-list">
+          <div
+            v-for="(item, index) in recentItems"
+            :key="index"
+            class="recent-item"
+          >
+            <IconProvince
+              :province-name="item.name"
+              :label="item.label"
+              :size="32"
+            />
+            <div class="item-info">
+              <span class="item-name">{{ item.displayName || item.name }}</span>
             </div>
+            <span class="item-date">{{ item.date }}</span>
+          </div>
         </div>
-        <div class="highlight-select">
-            <van-field v-model="fieldValue" is-link readonly label="点亮地区" placeholder="请选择点亮地区" @click="show = true" />
-            <van-popup v-model:show="show" round position="bottom">
-                <van-cascader v-model="cascaderValue" title="请选择所在地区" :options="options" @close="show = false"
-                    @finish="onFinish" />
-            </van-popup>
+
+        <div v-else class="empty-state">
+          <span class="empty-icon">🌍</span>
+          <p class="empty-text">暂无点亮记录，快去探索吧！</p>
         </div>
-    </div>
+      </section>
+    </main>
+  </div>
 </template>
 
 <script setup lang="ts">
-import * as echarts from 'echarts';
-import chinaMap from "@/assets/map/china.json";
-import { computed, onMounted, ref } from 'vue';
-import { useCascaderAreaData } from '@vant/area-data';
-import { Numeric } from 'vant/lib/utils';
-// 模式选择器
-const columns = [
-    { text: '市级', value: 'city' },
-    { text: '省级', value: 'provice' },
-];
-const modeValue = ref('市级');
-const showPicker = ref(false);
-const pickerValue = ref<Numeric[]>([]);
-const modeChangeFn = ({ selectedValues, selectedOptions }) => {
-    showPicker.value = false;
-    pickerValue.value = selectedValues;
-    modeValue.value = selectedOptions[0].text;
-};
-// 点亮地区选择器
-const show = ref(false);
-const fieldValue = ref('');
-const cascaderValue = ref('');
-const options = useCascaderAreaData();
-options.forEach(a => {
-    a.children?.forEach(b => {
-        // 四个直辖市和两个特别行政区不需要删除children属性
-        if (!["北京市", "天津市", "上海市", "重庆市", "香港特别行政区", "澳门特别行政区"].includes(a.text)) {
-            delete b.children
-        }
-    });
-})
-const onFinish = ({ selectedOptions }) => {
-    show.value = false;
-    fieldValue.value = selectedOptions.map((option) => option.text).join('/');
-    const selectCityName = selectedOptions[selectedOptions.length - 1]?.text;
-    updateHighlightData(selectCityName);
-};
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useMapStore } from '@/store';
+import { IconProvince } from '@/components/icons';
 
-echarts.registerMap("china", chinaMap as any);
-const highLightData = ref([
-    { name: "杭州市", selected: true },
-]);
-const mapOptions = ref({
-    backgroundColor: '#000',
-    mapType: 'china',
-    roam: true,
-    selectedMode: 'multiple',
-    zoom: 1.2,
-    silent: true,
+const router = useRouter();
+const mapStore = useMapStore();
+
+const quickActions = [
+  { icon: '🗺️', name: '地图', path: '/map' },
+  { icon: '📊', name: '统计', path: '/statistics' },
+  { icon: '🎨', name: '图标库', path: '/icon-gallery' },
+  { icon: '⭐', name: '收藏', path: '#' },
+];
+
+const provinceCount = computed(() => mapStore.provinceData.length);
+const cityCount = computed(() => mapStore.cityData.length);
+const totalVisited = computed(() => provinceCount.value + cityCount.value);
+
+const recentItems = computed(() => {
+  const allItems = [
+    ...mapStore.provinceData.map(item => ({
+      ...item,
+      label: item.name.slice(0, 2),
+      date: formatDate(item.name),
+    })),
+    ...mapStore.cityData.map(item => ({
+      ...item,
+      label: (item.fullName || item.name)?.slice(0, 2) || '??',
+      displayName: item.fullName || item.name,
+      date: formatDate(item.name),
+    })),
+  ];
+  return allItems.slice(-5).reverse();
 });
-let option = computed(() => ({
-    backgroundColor: mapOptions.value.backgroundColor,
-    series: [{
-        type: 'map',
-        map: mapOptions.value.mapType, // 使用已注册的地图名称
-        roam: mapOptions.value.roam, // 是否开启缩放平移
-        selectedMode: mapOptions.value.selectedMode, // 是否开启多选
-        silent: mapOptions.value.silent, // 图形是否不响应和触发鼠标事件，默认为 false，即响应和触发鼠标事件。
-        layoutCenter: ['50%', '50%'], //地图位置
-        scaleLimit: { // 设置缩放范围
-            min: 1.2,
-            max: 20
-        },
-        zoom: mapOptions.value.zoom, // 初始缩放级别
-        label: {
-            show: false
-        },
-        itemStyle: { // 默认地图区域的多边形 图形样式。
-            areaColor: '#171d26',
-            borderColor: '#303745'
-        },
-        emphasis: { // 高亮状态下的多边形和标签样式。
-            label: {
-                show: false
-            },
-            itemStyle: {
-                areaColor: '#14536c',
-                borderColor: '#fff'
-            }
-        },
-        select: { // 选中状态下的多边形和标签样式
-            label: {
-                show: true,
-                color: '#fff',
-            },
-            itemStyle: {
-                areaColor: '#14536c',
-                borderColor: '#fff'
-            }
-        },
-        // 如果需要，配置南海诸岛区域样式
-        regions: [{
-            name: '南海诸岛',
-            itemStyle: {
-                areaColor: 'transparent',
-                borderColor: 'transparent'
-            },
-            label: {
-                show: false
-            }
-        }],
-        data: highLightData.value,
-    }]
-}));
-let myChart = null;
-const initCityLevelEcharts = (option) => {
-    // 基于准备好的dom，初始化echarts实例
-    // #171d26 #303745 #14536c
-    myChart.setOption(option);
+
+function formatDate(_name: string): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${month}-${day}`;
 }
-/**
- * 更新高亮数据
- * @param name {string} 地区名称
- */
-const updateHighlightData = (name: string) => {
-    highLightData.value.push({
-        name,
-        selected: true,
-    })
-    myChart.clear();
-    myChart.setOption(option.value);
+
+function goToMap() {
+  router.push('/map');
 }
-/**重置地图大小 */
-const resetMap = () => {
-    myChart.clear();
-    myChart.setOption(option.value);
+
+function goToStatistics() {
+  router.push('/statistics');
 }
-onMounted(() => {
-    myChart = echarts.init(document.getElementById('echarts-container'));
-    initCityLevelEcharts(option.value);
-})
+
+function navigateTo(path: string) {
+  if (path !== '#') {
+    router.push(path);
+  }
+}
+
+function handleSearch() {
+  console.log('搜索功能');
+}
+
+function handleNotification() {
+  console.log('通知功能');
+}
 </script>
 
 <style scoped lang="less">
-:deep(.mode-select .van-field__label) {
-    width: 30px;
+.home-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-:deep(.highlight-select .van-field__label) {
-    width: 60px;
+.nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 56px;
+  background: #ffffff;
+  border-bottom: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-:deep(.van-cell) {
-    background-color: var(--color-blue-50);
+.nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 16px;
+}
+
+.nav-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1E293B;
+  margin: 0;
+}
+
+.nav-icon {
+  font-size: 22px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: #F1F5F9;
+  }
+
+  &:active {
+    background: #E2E8F0;
+  }
+}
+
+.action-icon {
+  font-size: 20px;
+}
+
+.main-content {
+  padding-top: 0;
+}
+
+.hero-card {
+  margin: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 50%, #134E4A 100%);
+  border-radius: 20px;
+  color: white;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.hero-header {
+  margin-bottom: 16px;
+}
+
+.hero-title {
+  font-size: 16px;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.hero-stats {
+  margin-bottom: 20px;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: #10B981;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.stat-subtitle {
+  font-size: 14px;
+  opacity: 0.8;
+  font-weight: 400;
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 0 16px;
+  margin-top: 24px;
+}
+
+.action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 12px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+}
+
+.action-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ECFDF5;
+  border-radius: 12px;
+}
+
+.action-icon-large {
+  font-size: 22px;
+  color: #10B981;
+}
+
+.action-name {
+  font-size: 14px;
+  color: #1E293B;
+  font-weight: 500;
+}
+
+.recent-section {
+  padding: 0 16px;
+  margin-top: 28px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1E293B;
+  margin: 0;
+}
+
+.view-all {
+  font-size: 14px;
+  color: #10B981;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    color: #059669;
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1E293B;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-date {
+  font-size: 12px;
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: #94A3B8;
+  margin: 0;
+  text-align: center;
 }
 </style>
