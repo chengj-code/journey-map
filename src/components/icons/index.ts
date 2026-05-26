@@ -1,0 +1,1 @@
+export { default as IconProvince } from './IconProvince.vue'
