@@ -22,21 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Vue SFC compiled output (should not be committed)
-*.vue.js
-
-# TypeScript project: prevent duplicate JS source files
-# (This is a TS project - JS files are generated during build, not committed)
-/src/*.js
-/src/**/*.js
-!/src/**/*.{test,spec}.js
-
-# Config files: prefer .ts versions over .js
-/vite.config.js
-/tailwind.config.js
-/postcss.config.js
-/eslint.config.*.js
-/.eslintrc.*.js
-/babel.config.*.js
-/jest.config.*.js
