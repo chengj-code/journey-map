@@ -149,35 +149,86 @@
     </van-popup>
 
     <!-- 新建标签弹窗 -->
-    <van-dialog
+    <van-popup
       v-model:show="showAddTagDialog"
-      title="新建标签"
-      show-cancel-button
-      confirm-button-text="创建"
-      @confirm="handleCreateTag"
+      position="bottom"
+      round
+      :style="{ maxHeight: '85%' }"
+      :lock-scroll="true"
+      :safe-area-inset-bottom="true"
     >
-      <div class="add-tag-form">
-        <van-field
-          v-model="newTagName"
-          placeholder="标签名称"
-          maxlength="10"
-          required
-        />
-        <div class="color-picker">
-          <label class="color-label">颜色</label>
-          <div class="color-options">
-            <span
-              v-for="color in presetColors"
-              :key="color"
-              class="color-dot"
-              :class="{ selected: newTagColor === color }"
-              :style="{ backgroundColor: color }"
-              @click="newTagColor = color"
-            ></span>
+      <div class="add-tag-dialog">
+        <div class="dialog-header">
+          <span class="cancel-btn" @click="showAddTagDialog = false">取消</span>
+          <h3>新建标签</h3>
+          <span class="confirm-btn" :class="{ disabled: !newTagName.trim() }" @click="handleCreateTag">完成</span>
+        </div>
+
+        <div class="dialog-content">
+          <!-- 标签名称输入 -->
+          <div class="input-section">
+            <label class="field-label">标签名称</label>
+            <van-field
+              v-model="newTagName"
+              placeholder="请输入标签名称"
+              maxlength="10"
+              clearable
+              show-word-limit
+              class="name-input"
+            />
+          </div>
+
+          <!-- 实时预览 -->
+          <div v-if="newTagName.trim()" class="preview-section">
+            <label class="field-label">预览效果</label>
+            <div class="preview-chip" :style="{ backgroundColor: newTagColor + '20', borderColor: newTagColor }">
+              <span class="preview-dot" :style="{ backgroundColor: newTagColor }"></span>
+              <span class="preview-name" :style="{ color: newTagColor }">{{ newTagName }}</span>
+            </div>
+          </div>
+
+          <!-- 颜色选择 -->
+          <div class="color-section">
+            <label class="field-label">选择颜色</label>
+            <div class="color-grid">
+              <div
+                v-for="(color, index) in presetColors"
+                :key="color"
+                class="color-item"
+                :class="{ selected: newTagColor === color }"
+                :style="{ backgroundColor: color, '--color': color }"
+                @click="newTagColor = color"
+              >
+                <van-icon v-if="newTagColor === color" name="success" color="#fff" size="16" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 图标选择（可选） -->
+          <div class="icon-section">
+            <label class="field-label">选择图标（可选）</label>
+            <div class="icon-grid">
+              <div
+                v-for="icon in presetIcons"
+                :key="icon"
+                class="icon-item"
+                :class="{ selected: newTagIcon === icon }"
+                @click="newTagIcon = icon"
+              >
+                {{ icon }}
+              </div>
+              <div
+                class="icon-item"
+                :class="{ selected: !newTagIcon }"
+                @click="newTagIcon = ''"
+              >
+                无
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </van-dialog>
+    </van-popup>
   </van-popup>
 </template>
 
@@ -231,6 +282,11 @@ const presetColors = [
   '#14B8A6', '#3B82F6', '#8B5CF6', '#EC4899',
 ];
 
+const presetIcons = [
+  '🏷️', '📌', '⭐', '💰', '🍜', '🚗',
+  '🏠', '💼', '🎮', '📚', '❤️', '🎯',
+];
+
 const showCategoryPicker = ref(false);
 const showDatePicker = ref(false);
 const showAddTagDialog = ref(false);
@@ -239,6 +295,7 @@ const customCategoryName = ref('');
 const tempCategory = ref('');
 const newTagName = ref('');
 const newTagColor = ref(presetColors[0]);
+const newTagIcon = ref('');
 
 const amountDisplay = ref('');
 const dateValue = ref([]);
