@@ -40,3 +40,4 @@ dist-ssr
 /.eslintrc.*.js
 /babel.config.*.js
 /jest.config.*.js
+.pnpm-store/
