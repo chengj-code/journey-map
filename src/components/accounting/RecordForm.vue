@@ -352,7 +352,7 @@ function formatAmount(value: string): string {
 }
 
 function handleAmountInput(value: string) {
-  const num = parseFloat(value);
+  const num = parseFloat(String(value).replace(/[^\d.-]/g, ''));
   form.amount = isNaN(num) ? 0 : Math.abs(num);
 }
 
@@ -430,6 +430,11 @@ function validateForm(): boolean {
 function handleSubmit() {
   if (customCategoryName.value.trim()) {
     form.category = customCategoryName.value.trim();
+  }
+
+  const num = parseFloat(String(amountDisplay.value).replace(/[^\d.-]/g, ''));
+  if (!isNaN(num) && num > 0) {
+    form.amount = Math.abs(num);
   }
 
   if (!validateForm()) return;
