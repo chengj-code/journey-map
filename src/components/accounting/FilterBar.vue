@@ -13,7 +13,7 @@
         <van-icon name="arrow-down" size="10" class="chip-arrow" :class="{ rotated: showTimeDropdown }" />
       </div>
 
-      <div v-if="tags.length > 0" class="filter-chip dropdown-chip" :class="{ active: modelValue.selectedTagIds.length > 0 }" @click="showTagDropdown = !showTagDropdown">
+      <div class="filter-chip dropdown-chip" :class="{ active: modelValue.selectedTagIds.length > 0 }" @click="showTagDropdown = !showTagDropdown">
         <van-icon name="label-o" size="13" />
         <span>{{ modelValue.selectedTagIds.length > 0 ? '已选' + modelValue.selectedTagIds.length + '个' : '标签' }}</span>
         <van-icon name="arrow-down" size="10" class="chip-arrow" :class="{ rotated: showTagDropdown }" />
@@ -37,21 +37,24 @@
     </div>
 
     <!-- 标签多选下拉 -->
-    <div v-if="showTagDropdown && tags.length > 0" class="dropdown-panel tag-dropdown">
-      <div
-        v-for="tag in tags"
-        :key="tag.id"
-        class="dropdown-item tag-item"
-        :class="{ selected: modelValue.selectedTagIds.includes(tag.id) }"
-        :style="getTagStyle(tag, modelValue.selectedTagIds.includes(tag.id))"
-        @click="toggleTag(tag.id)"
-      >
-        <van-icon v-if="modelValue.selectedTagIds.includes(tag.id)" name="success" size="14" color="#ffffff" />
-        <span>{{ tag.name }}</span>
-      </div>
-      <div v-if="modelValue.selectedTagIds.length > 0" class="dropdown-footer">
-        <span class="clear-tags-btn" @click="clearTags">清除已选</span>
-      </div>
+    <div v-if="showTagDropdown" class="dropdown-panel tag-dropdown">
+      <template v-if="tags.length > 0">
+        <div
+          v-for="tag in tags"
+          :key="tag.id"
+          class="dropdown-item tag-item"
+          :class="{ selected: modelValue.selectedTagIds.includes(tag.id) }"
+          :style="getTagStyle(tag, modelValue.selectedTagIds.includes(tag.id))"
+          @click="toggleTag(tag.id)"
+        >
+          <van-icon v-if="modelValue.selectedTagIds.includes(tag.id)" name="success" size="14" color="#ffffff" />
+          <span>{{ tag.name }}</span>
+        </div>
+        <div v-if="modelValue.selectedTagIds.length > 0" class="dropdown-footer">
+          <span class="clear-tags-btn" @click="clearTags">清除已选</span>
+        </div>
+      </template>
+      <div v-else class="empty-hint">暂无标签，请先创建</div>
     </div>
 
     <div v-if="showTimeDropdown || showTagDropdown" class="popover-mask" @click="closeAllDropdowns" />
@@ -493,6 +496,13 @@ function emitUpdate(value: FilterState) {
       background: #FEF2F2;
     }
   }
+}
+
+.empty-hint {
+  padding: 20px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #94A3B8;
 }
 
 .popover-mask {
