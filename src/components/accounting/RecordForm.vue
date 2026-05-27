@@ -54,9 +54,11 @@
 
         <!-- 标签选择 -->
         <div class="tag-section">
-          <div class="tag-header">
-            <span>标签</span>
-            <span class="add-tag-btn" @click="showAddTagDialog = true">+ 添加</span>
+          <div class="tag-cell">
+            <div class="tag-label">标签</div>
+            <div class="tag-content">
+              <span class="add-tag-inline" @click="showAddTagDialog = true">+ 添加</span>
+            </div>
           </div>
           <div class="tag-list">
             <div
@@ -519,30 +521,40 @@ function handlePopupClose(show: boolean) {
 .tag-section {
   margin-bottom: 16px;
 
-  .tag-header {
+  .tag-cell {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
+    padding: 10px 0;
+    min-height: 44px;
 
-    span:first-child {
+    .tag-label {
+      width: 90px;
+      flex-shrink: 0;
       font-size: 14px;
       font-weight: 500;
-      color: #475569;
+      color: #323233; /* Vant van-cell title color */
     }
 
-    .add-tag-btn {
-      font-size: 13px;
-      color: #3B82F6;
-      cursor: pointer;
+    .tag-content {
+      flex: 1;
+      color: #969799; /* Vant van-cell value color */
+      font-size: 14px;
+
+      .add-tag-inline {
+        color: #3B82F6;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 2px 0;
+      }
     }
   }
 
   .tag-list {
+    padding-left: 90px;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    min-height: 40px;
+    min-height: 32px;
   }
 
   .tag-chip {
