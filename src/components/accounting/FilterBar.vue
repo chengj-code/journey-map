@@ -90,8 +90,8 @@ const now = new Date()
 const currentYear = now.getFullYear()
 const currentMonth = now.getMonth() + 1
 
-const minCalDate = new Date(2020, 0, 1)
-const maxCalDate = new Date(2030, 11, 31)
+const minCalDate = new Date(currentYear - 5, 0, 1)
+const maxCalDate = new Date(currentYear + 2, 11, 31)
 
 function fmt(date: Date): string {
   const y = date.getFullYear()

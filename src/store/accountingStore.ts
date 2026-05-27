@@ -156,6 +156,13 @@ export const useAccountingStore = defineStore('accounting', {
     },
 
     initDefaultBook() {
+      if (!this.filterState.startDate || !this.filterState.endDate) {
+        const n = new Date();
+        const y = n.getFullYear();
+        const m = n.getMonth() + 1;
+        this.filterState.startDate = `${y}-${String(m).padStart(2, '0')}-01`;
+        this.filterState.endDate = `${y}-${String(m).padStart(2, '0')}-${new Date(y, m, 0).getDate().toString().padStart(2, '0')}`;
+      }
       if (this.books.length === 0) {
         const now = new Date().toISOString();
         const defaultBook: AccountingBook = {
