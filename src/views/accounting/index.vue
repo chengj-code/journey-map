@@ -144,7 +144,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { showToast } from 'vant';
 import { useAccountingStore } from '@/store';
-import type { FilterState } from '@/store/accountingStore';
+import type { FilterState } from '@/types/accounting';
 import BookSwitcher from '@/components/accounting/BookSwitcher.vue';
 import FilterBar from '@/components/accounting/FilterBar.vue';
 import RecordForm from '@/components/accounting/RecordForm.vue';
@@ -198,8 +198,8 @@ const monthlySummary = computed(() => {
 
 const filterDateRange = computed(() => {
   return {
-    year: store.filterState.year,
-    month: store.filterState.month,
+    startDate: store.filterState.startDate,
+    endDate: store.filterState.endDate,
   };
 });
 

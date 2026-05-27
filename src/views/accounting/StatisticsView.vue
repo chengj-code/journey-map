@@ -86,12 +86,11 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import * as echarts from 'echarts'
-import type { AccountingRecord } from '@/types/accounting'
-import type { FilterState } from '@/store/accountingStore'
+import type { AccountingRecord, FilterState } from '@/types/accounting'
 
 interface Props {
   records: AccountingRecord[]
-  dateRange: { year: number | null; month?: number | null }
+  dateRange: { startDate: string | null; endDate: string | null }
   filterState?: FilterState
 }
 
@@ -130,11 +129,18 @@ function getCategoryColor(category: string): string {
 }
 
 const dateRangeLabel = computed(() => {
-  const { year, month } = props.dateRange
-  if (month !== undefined && month !== null) {
-    return `${year}年${month}月`
+  const { startDate, endDate } = props.dateRange
+  if (startDate && endDate) {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`
+    const endStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}`
+    if (startStr === endStr) {
+      return startStr
+    }
+    return `${startStr} ~ ${endStr}`
   }
-  return `${year}年`
+  return '全部'
 })
 
 const expenseRecords = computed(() => {

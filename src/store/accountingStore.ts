@@ -1,13 +1,5 @@
 import { defineStore } from 'pinia';
-import type { AccountingBook, AccountingRecord, Tag } from '@/types/accounting';
-
-export interface FilterState {
-  year: number | null;
-  month: number | null;
-  date: string | null;
-  selectedTagIds: string[];
-  _rangeStart?: boolean;
-}
+import type { AccountingBook, AccountingRecord, Tag, FilterState } from '@/types/accounting';
 
 export const useAccountingStore = defineStore('accounting', {
   state: () => ({
@@ -16,10 +8,9 @@ export const useAccountingStore = defineStore('accounting', {
     tags: [] as Tag[],
     currentBookId: '' as string,
     filterState: {
-      year: new Date().getFullYear(),
-      month: new Date().getMonth() + 1,
-      date: null,
-      selectedTagIds: [],
+      startDate: null as string | null,
+      endDate: null as string | null,
+      selectedTagIds: [] as string[],
     } as FilterState,
   }),
 
@@ -37,22 +28,12 @@ export const useAccountingStore = defineStore('accounting', {
     filteredRecords(state): AccountingRecord[] {
       let records = [...this.currentRecords];
 
-      if (state.filterState.year) {
-        records = records.filter((r) => r.date.startsWith(`${state.filterState.year}`));
+      if (state.filterState.startDate) {
+        records = records.filter((r) => r.date >= state.filterState.startDate!);
       }
 
-      if (state.filterState.month) {
-        const monthStr = String(state.filterState.month).padStart(2, '0');
-        records = records.filter((r) => r.date.slice(5, 7) === monthStr);
-      }
-
-      if (state.filterState.date) {
-        if (state.filterState._rangeStart) {
-          const rangeDate = new Date(state.filterState.date);
-          records = records.filter((r) => new Date(r.date) >= rangeDate);
-        } else {
-          records = records.filter((r) => r.date === state.filterState.date);
-        }
+      if (state.filterState.endDate) {
+        records = records.filter((r) => r.date <= state.filterState.endDate!);
       }
 
       if (state.filterState.selectedTagIds.length > 0) {
@@ -94,61 +75,61 @@ export const useAccountingStore = defineStore('accounting', {
     },
 
     resetFilter() {
-      const now = new Date();
       this.filterState = {
-        year: now.getFullYear(),
-        month: now.getMonth() + 1,
-        date: null,
+        startDate: null,
+        endDate: null,
         selectedTagIds: [],
       };
     },
 
     setQuickFilter(type: 'month' | 'lastMonth' | 'threeMonths' | 'year' | 'all') {
       const now = new Date();
+      const y = now.getFullYear();
+      const m = now.getMonth() + 1;
 
       switch (type) {
-        case 'month':
+        case 'month': {
           this.filterState = {
-            year: now.getFullYear(),
-            month: now.getMonth() + 1,
-            date: null,
+            startDate: `${y}-${String(m).padStart(2, '0')}-01`,
+            endDate: `${y}-${String(m).padStart(2, '0')}-${new Date(y, m, 0).getDate().toString().padStart(2, '0')}`,
             selectedTagIds: [],
           };
           break;
+        }
         case 'lastMonth': {
-          const d = new Date(now.getFullYear(), now.getMonth() - 1);
+          const d = new Date(y, now.getMonth(), 0);
+          const ly = d.getFullYear();
+          const lm = d.getMonth() + 1;
           this.filterState = {
-            year: d.getFullYear(),
-            month: d.getMonth() + 1,
-            date: null,
+            startDate: `${ly}-${String(lm).padStart(2, '0')}-01`,
+            endDate: `${ly}-${String(lm).padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`,
             selectedTagIds: [],
           };
           break;
         }
         case 'threeMonths': {
-          const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+          const start = new Date(y, now.getMonth() - 2, 1);
+          const sy = start.getFullYear();
+          const sm = start.getMonth() + 1;
           this.filterState = {
-            year: threeMonthsAgo.getFullYear(),
-            month: null,
-            date: `${threeMonthsAgo.getFullYear()}-${String(threeMonthsAgo.getMonth() + 1).padStart(2, '0')}-01`,
+            startDate: `${sy}-${String(sm).padStart(2, '0')}-01`,
+            endDate: `${y}-${String(m).padStart(2, '0')}-${new Date(y, m, 0).getDate().toString().padStart(2, '0')}`,
             selectedTagIds: [],
-            _rangeStart: true,
           };
           break;
         }
-        case 'year':
+        case 'year': {
           this.filterState = {
-            year: now.getFullYear(),
-            month: null,
-            date: null,
+            startDate: `${y}-01-01`,
+            endDate: `${y}-12-31`,
             selectedTagIds: [],
           };
           break;
+        }
         case 'all':
           this.filterState = {
-            year: null,
-            month: null,
-            date: null,
+            startDate: null,
+            endDate: null,
             selectedTagIds: [],
           };
           break;

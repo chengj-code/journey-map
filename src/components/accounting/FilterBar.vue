@@ -1,21 +1,15 @@
 <template>
   <div class="filter-bar">
-    <!-- 时间维度筛选 -->
+    <!-- 时间维度筛选 - 日期区间 -->
     <div class="time-filter-section">
-      <div class="time-selectors">
-        <div class="selector-item" @click="showYearPicker = true">
-          <span>{{ modelValue.year ? `${modelValue.year}年` : '全部年' }}</span>
-          <van-icon name="arrow-down" size="12" />
+      <div class="range-selector" @click="showRangePicker = true">
+        <div class="range-display">
+          <span v-if="modelValue.startDate && modelValue.endDate" class="range-text">
+            {{ formatDisplayDate(modelValue.startDate) }} ~ {{ formatDisplayDate(modelValue.endDate) }}
+          </span>
+          <span v-else class="range-placeholder">选择日期区间</span>
         </div>
-
-        <div class="selector-item" @click="showMonthPicker = true">
-          <span>{{ modelValue.month ? `${modelValue.month}月` : '全部月' }}</span>
-          <van-icon name="arrow-down" size="12" />
-        </div>
-
-        <div class="selector-item" @click="showDatePicker = true">
-          <span>📅 {{ modelValue.date ? modelValue.date : '全部日期' }}</span>
-        </div>
+        <van-icon name="arrow-down" size="12" />
       </div>
 
       <!-- 快捷按钮 -->
@@ -61,6 +55,11 @@
           全部
         </van-button>
       </div>
+
+      <!-- 已选区间清除 -->
+      <div v-if="modelValue.startDate || modelValue.endDate" class="clear-range-row">
+        <span class="clear-range-btn" @click="clearRange">✕ 清除日期筛选</span>
+      </div>
     </div>
 
     <!-- 标签维度筛选 -->
@@ -94,44 +93,24 @@
       <span class="reset-btn" @click="handleReset">重置筛选</span>
     </div>
 
-    <!-- 年份选择器 -->
-    <van-popup v-model:show="showYearPicker" position="bottom" round :lock-scroll="true" :safe-area-inset-bottom="true">
-      <van-picker
-        :columns="yearColumns"
-        :default-index="defaultYearIndex"
-        title="选择年份"
-        @confirm="onYearConfirm"
-        @cancel="showYearPicker = false"
-      />
-    </van-popup>
-
-    <!-- 月份选择器 -->
-    <van-popup v-model:show="showMonthPicker" position="bottom" round :lock-scroll="true" :safe-area-inset-bottom="true">
-      <van-picker
-        :columns="monthColumns"
-        :default-index="defaultMonthIndex"
-        title="选择月份"
-        @confirm="onMonthConfirm"
-        @cancel="showMonthPicker = false"
-      />
-    </van-popup>
-
-    <!-- 日期选择器 -->
-    <van-popup v-model:show="showDatePicker" position="bottom" round :lock-scroll="true" :safe-area-inset-bottom="true">
+    <!-- 日期区间选择器 -->
+    <van-popup v-model:show="showRangePicker" position="bottom" round :lock-scroll="true" :safe-area-inset-bottom="true">
       <div class="date-picker-container">
         <div class="picker-header">
-          <span @click="clearDate">清除</span>
-          <h3>选择日期</h3>
-          <span class="confirm-text" @click="showDatePicker = false">完成</span>
+          <span @click="clearRangeAndClose">清除</span>
+          <h3>选择日期区间</h3>
+          <span class="confirm-text" @click="confirmRange">完成</span>
         </div>
         <van-calendar
           ref="calendarRef"
+          type="range"
           :poppable="false"
           :show-confirm="false"
-          :default-date="defaultCalendarDate"
           :min-date="new Date(2020, 0, 1)"
           :max-date="new Date(2030, 11, 31)"
-          @select="onDateSelect"
+          :default-date="defaultRangeDate"
+          @select="onRangeSelect"
+          @confirm="onRangeConfirm"
         />
       </div>
     </van-popup>
@@ -140,14 +119,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { Tag } from '@/types/accounting';
-
-export interface FilterState {
-  year: number | null;
-  month: number | null;
-  date: string | null;
-  selectedTagIds: string[];
-}
+import type { Tag, FilterState } from '@/types/accounting';
 
 interface Props {
   modelValue: FilterState;
@@ -161,49 +133,34 @@ const emit = defineEmits<{
   (e: 'reset'): void;
 }>();
 
-const showYearPicker = ref(false);
-const showMonthPicker = ref(false);
-const showDatePicker = ref(false);
+const showRangePicker = ref(false);
 const calendarRef = ref();
+const tempStartDate = ref<string | null>(null);
+const tempEndDate = ref<string | null>(null);
 
 const now = new Date();
 const currentYear = now.getFullYear();
 const currentMonth = now.getMonth() + 1;
 
-const yearColumns = computed(() => {
-  const startYear = currentYear - 5;
-  const endYear = currentYear + 1;
-  const years = [];
-  for (let y = startYear; y <= endYear; y++) {
-    years.push({ text: `${y}年`, value: y });
+function formatDisplayDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+}
+
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+const defaultRangeDate = computed(() => {
+  if (props.modelValue.startDate && props.modelValue.endDate) {
+    return [new Date(props.modelValue.startDate), new Date(props.modelValue.endDate)] as [Date, Date];
   }
-  return years;
-});
-
-const monthColumns = [
-  { text: '全部', value: null },
-  ...Array.from({ length: 12 }, (_, i) => ({
-    text: `${i + 1}月`,
-    value: i + 1,
-  })),
-];
-
-const defaultYearIndex = computed(() => {
-  if (!props.modelValue.year) return 5;
-  const idx = yearColumns.value.findIndex((y) => y.value === props.modelValue.year);
-  return idx >= 0 ? idx : 5;
-});
-
-const defaultMonthIndex = computed(() => {
-  if (!props.modelValue.month) return 0;
-  return props.modelValue.month;
-});
-
-const defaultCalendarDate = computed(() => {
-  if (props.modelValue.date) {
-    return new Date(props.modelValue.date);
-  }
-  return new Date();
+  return undefined;
 });
 
 function getTagStyle(tag: Tag, isSelected: boolean) {
@@ -244,91 +201,94 @@ function clearTags() {
   });
 }
 
-function onYearConfirm({ selectedValues }: { selectedValues: (number | null)[] }) {
-  emitUpdate({
-    ...props.modelValue,
-    year: selectedValues[0] as number,
-  });
-  showYearPicker.value = false;
+function onRangeSelect(dates: [Date, Date]) {
+  tempStartDate.value = formatDate(dates[0]);
+  tempEndDate.value = formatDate(dates[1]);
 }
 
-function onMonthConfirm({ selectedValues }: { selectedValues: (number | null)[] }) {
+function onRangeConfirm(dates: [Date, Date]) {
   emitUpdate({
     ...props.modelValue,
-    month: selectedValues[0] as number | null,
+    startDate: formatDate(dates[0]),
+    endDate: formatDate(dates[1]),
   });
-  showMonthPicker.value = false;
+  showRangePicker.value = false;
 }
 
-function onDateSelect(date: Date) {
-  const dateStr = formatDate(date);
+function confirmRange() {
+  if (tempStartDate.value && tempEndDate.value) {
+    emitUpdate({
+      ...props.modelValue,
+      startDate: tempStartDate.value,
+      endDate: tempEndDate.value,
+    });
+  }
+  showRangePicker.value = false;
+}
+
+function clearRange() {
   emitUpdate({
     ...props.modelValue,
-    date: dateStr,
+    startDate: null,
+    endDate: null,
   });
 }
 
-function clearDate() {
+function clearRangeAndClose() {
   emitUpdate({
     ...props.modelValue,
-    date: null,
+    startDate: null,
+    endDate: null,
   });
-  showDatePicker.value = false;
-}
-
-function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  showRangePicker.value = false;
 }
 
 function handleQuickFilter(type: 'month' | 'lastMonth' | 'threeMonths' | 'year' | 'all') {
   let newState: FilterState;
 
   switch (type) {
-    case 'month':
+    case 'month': {
       newState = {
-        year: currentYear,
-        month: currentMonth,
-        date: null,
+        startDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`,
+        endDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate().toString().padStart(2, '0')}`,
         selectedTagIds: [...props.modelValue.selectedTagIds],
       };
       break;
+    }
     case 'lastMonth': {
-      const d = new Date(currentYear, currentMonth - 2);
+      const d = new Date(currentYear, currentMonth - 1, 0);
+      const ly = d.getFullYear();
+      const lm = d.getMonth() + 1;
       newState = {
-        year: d.getFullYear(),
-        month: d.getMonth() + 1,
-        date: null,
+        startDate: `${ly}-${String(lm).padStart(2, '0')}-01`,
+        endDate: `${ly}-${String(lm).padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`,
         selectedTagIds: [...props.modelValue.selectedTagIds],
       };
       break;
     }
     case 'threeMonths': {
-      const threeMonthsAgo = new Date(currentYear, currentMonth - 3);
+      const start = new Date(currentYear, currentMonth - 3, 1);
+      const sy = start.getFullYear();
+      const sm = start.getMonth() + 1;
       newState = {
-        year: threeMonthsAgo.getFullYear(),
-        month: null,
-        date: formatDate(threeMonthsAgo),
+        startDate: `${sy}-${String(sm).padStart(2, '0')}-01`,
+        endDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate().toString().padStart(2, '0')}`,
         selectedTagIds: [...props.modelValue.selectedTagIds],
-        _rangeStart: true,
       };
       break;
     }
-    case 'year':
+    case 'year': {
       newState = {
-        year: currentYear,
-        month: null,
-        date: null,
+        startDate: `${currentYear}-01-01`,
+        endDate: `${currentYear}-12-31`,
         selectedTagIds: [...props.modelValue.selectedTagIds],
       };
       break;
+    }
     case 'all':
       newState = {
-        year: null,
-        month: null,
-        date: null,
+        startDate: null,
+        endDate: null,
         selectedTagIds: [],
       };
       break;
@@ -341,26 +301,36 @@ function isQuickActive(type: string): boolean {
   const s = props.modelValue;
 
   switch (type) {
-    case 'month':
-      return s.year === currentYear && s.month === currentMonth && !s.date && !s._rangeStart;
+    case 'month': {
+      if (!s.startDate || !s.endDate) return false;
+      const start = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+      const end = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate().toString().padStart(2, '0')}`;
+      return s.startDate === start && s.endDate === end;
+    }
     case 'lastMonth': {
-      const lastM = new Date(currentYear, currentMonth - 2);
-      return (
-        s.year === lastM.getFullYear() &&
-        s.month === lastM.getMonth() + 1 &&
-        !s.date &&
-        !s._rangeStart
-      );
+      if (!s.startDate || !s.endDate) return false;
+      const d = new Date(currentYear, currentMonth - 1, 0);
+      const ly = d.getFullYear();
+      const lm = d.getMonth() + 1;
+      const start = `${ly}-${String(lm).padStart(2, '0')}-01`;
+      const end = `${ly}-${String(lm).padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+      return s.startDate === start && s.endDate === end;
     }
     case 'threeMonths': {
-      if (!s._rangeStart || !s.date) return false;
-      const threeMAgo = new Date(currentYear, currentMonth - 3);
-      return s.year === threeMAgo.getFullYear() && s.date <= formatDate(threeMAgo);
+      if (!s.startDate || !s.endDate) return false;
+      const rangeStart = new Date(currentYear, currentMonth - 3, 1);
+      const sy = rangeStart.getFullYear();
+      const sm = rangeStart.getMonth() + 1;
+      const start = `${sy}-${String(sm).padStart(2, '0')}-01`;
+      const end = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate().toString().padStart(2, '0')}`;
+      return s.startDate === start && s.endDate === end;
     }
-    case 'year':
-      return s.year === currentYear && !s.month && !s.date && !s._rangeStart;
+    case 'year': {
+      if (!s.startDate || !s.endDate) return false;
+      return s.startDate === `${currentYear}-01-01` && s.endDate === `${currentYear}-12-31`;
+    }
     case 'all':
-      return !s.year && !s.month && !s.date && s.selectedTagIds.length === 0;
+      return !s.startDate && !s.endDate && s.selectedTagIds.length === 0;
     default:
       return false;
   }
@@ -373,17 +343,10 @@ function handleReset() {
 const filterSummaryText = computed(() => {
   const parts: string[] = [];
 
-  if (props.modelValue.year) {
-    parts.push(`${props.modelValue.year}年`);
-    if (props.modelValue.month) {
-      parts[0] += `${props.modelValue.month}月`;
-    }
-  } else if (!props.modelValue.year && !props.modelValue.month && !props.modelValue.date) {
+  if (props.modelValue.startDate && props.modelValue.endDate) {
+    parts.push(`${formatDisplayDate(props.modelValue.startDate)} ~ ${formatDisplayDate(props.modelValue.endDate)}`);
+  } else if (!props.modelValue.startDate && !props.modelValue.endDate) {
     parts.push('全部时间');
-  }
-
-  if (props.modelValue.date) {
-    parts.push(props.modelValue.date);
   }
 
   if (props.modelValue.selectedTagIds.length > 0) {
@@ -391,7 +354,7 @@ const filterSummaryText = computed(() => {
   }
 
   if (parts.length === 0) {
-    return '本月全部记录';
+    return '全部记录';
   }
 
   return parts.join(' · ');
@@ -418,48 +381,47 @@ function emitUpdate(value: FilterState) {
   margin-bottom: 12px;
 }
 
-.time-selectors {
+.range-selector {
   display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #F8FAFC;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1.5px solid #E2E8F0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  min-height: 42px;
 
-  .selector-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 8px 14px;
-    background: #F8FAFC;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid #E2E8F0;
-    position: relative;
-    z-index: 1;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    min-height: 36px;
-    min-width: 70px;
-    justify-content: center;
+  .range-display {
+    flex: 1;
+    text-align: center;
 
-    span {
+    .range-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1E293B;
+      letter-spacing: 0.5px;
+    }
+
+    .range-placeholder {
       font-size: 13px;
       font-weight: 500;
-      color: #334155;
-      white-space: nowrap;
-      pointer-events: none;
-    }
-
-    .van-icon {
       color: #94A3B8;
-      pointer-events: none;
-      flex-shrink: 0;
     }
+  }
 
-    &:active {
-      background: #E2E8F0;
-      transform: scale(0.97);
-    }
+  .van-icon {
+    color: #94A3B8;
+    flex-shrink: 0;
+  }
+
+  &:active {
+    background: #E2E8F0;
+    transform: scale(0.98);
   }
 }
 
@@ -467,11 +429,32 @@ function emitUpdate(value: FilterState) {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: 10px;
 
   .van-button {
     height: 28px;
     font-size: 12px;
     padding: 0 14px;
+  }
+}
+
+.clear-range-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+
+  .clear-range-btn {
+    font-size: 12px;
+    color: #94A3B8;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 10px;
+    transition: all 0.2s;
+
+    &:active {
+      color: #EF4444;
+      background: #FEF2F2;
+    }
   }
 }
 
@@ -584,7 +567,8 @@ function emitUpdate(value: FilterState) {
 
       &.confirm-text {
         color: #3B82F6;
-        font-weight: 500;
+        font-weight: 600;
+        font-size: 15px;
       }
     }
 

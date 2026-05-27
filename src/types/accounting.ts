@@ -27,3 +27,9 @@ export interface Tag {
   icon?: string
   createdAt: string
 }
+
+export interface FilterState {
+  startDate: string | null
+  endDate: string | null
+  selectedTagIds: string[]
+}
