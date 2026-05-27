@@ -270,6 +270,6 @@ export const useAccountingStore = defineStore('accounting', {
   },
 
   persist: {
-    key: 'accounting-store',
+    key: 'accounting-store-v2',
   },
 });
