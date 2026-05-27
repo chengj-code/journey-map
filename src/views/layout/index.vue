@@ -2,8 +2,9 @@
   <div class="layout-container">
     <div class="content">
       <Home v-show="active === 0" />
-      <Statistics v-show="active === 1" />
-      <User v-show="active === 2" />
+      <Accounting v-show="active === 1" />
+      <Statistics v-show="active === 2" />
+      <User v-show="active === 3" />
     </div>
     <div class="custom-tabbar">
       <div
@@ -23,6 +24,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Home from '@/views/home/index.vue'
+import Accounting from '@/views/accounting/index.vue'
 import Statistics from '@/views/statistics/index.vue'
 import User from '@/views/user/index.vue'
 
@@ -30,6 +32,7 @@ const active = ref(0)
 
 const tabs = [
   { icon: '🏠', label: '首页' },
+  { icon: '💰', label: '记账' },
   { icon: '📊', label: '统计' },
   { icon: '👤', label: '我的' },
 ]

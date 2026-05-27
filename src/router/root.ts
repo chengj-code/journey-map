@@ -40,6 +40,28 @@ export default [
         },
     },
     {
+        path: '/accounting',
+        component: () => import('@/views/layout/index.vue'),
+        children: [
+            {
+                path: '',
+                name: 'accounting',
+                component: () => import('@/views/accounting/index.vue'),
+                meta: {
+                    title: '记账本',
+                },
+            },
+            {
+                path: 'tags',
+                name: 'accounting-tags',
+                component: () => import('@/views/accounting/tags/index.vue'),
+                meta: {
+                    title: '标签管理',
+                },
+            },
+        ],
+    },
+    {
         path: '/',
         name: 'rename',
         component: () => import('@/views/login/rename.vue'),
