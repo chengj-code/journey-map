@@ -9,18 +9,18 @@
       <div class="overview-body">
         <div class="overview-item">
           <span class="overview-label">支出</span>
-          <span class="overview-amount expense">¥{{ totalExpense.toFixed(2) }}</span>
+          <span class="overview-amount expense">-¥{{ totalExpense.toFixed(2) }}</span>
         </div>
         <div class="overview-item">
           <span class="overview-label">收入</span>
-          <span class="overview-amount income">¥{{ totalIncome.toFixed(2) }}</span>
+          <span class="overview-amount income">+¥{{ totalIncome.toFixed(2) }}</span>
         </div>
       </div>
       <div class="overview-divider"></div>
       <div class="overview-balance">
         <span class="balance-label">结余</span>
         <span :class="['balance-value', balance >= 0 ? 'positive' : 'negative']">
-          {{ balance >= 0 ? '+' : '' }}¥{{ balance.toFixed(2) }}
+          {{ balance >= 0 ? '+' : '-' }}¥{{ Math.abs(balance).toFixed(2) }}
         </span>
       </div>
     </div>
