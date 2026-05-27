@@ -418,13 +418,13 @@ function getPieOption() {
     graphic: data.length > 0
       ? {
           type: 'text',
-          left: 'center',
+          left: '38%',
           top: 'center',
           style: {
             text: centerText,
             textAlign: 'center',
             fill: '#1E293B',
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: 700,
           },
         }
@@ -653,7 +653,8 @@ onBeforeUnmount(() => {
   }
 
   .pie-chart {
-    height: 280px;
+    height: 300px;
+    overflow: visible;
   }
 }
 
