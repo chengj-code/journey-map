@@ -1,7 +1,6 @@
 <template>
   <div class="filter-bar">
     <div class="filter-row">
-      <!-- 日期区间 -->
       <div class="filter-chip date-chip" @click="showRangePicker = true">
         <van-icon name="calendar-o" size="13" />
         <span v-if="modelValue.startDate && modelValue.endDate" class="chip-label">{{ rangeLabel }}</span>
@@ -9,23 +8,19 @@
         <van-icon name="arrow-down" size="10" class="chip-arrow" />
       </div>
 
-      <!-- 快捷筛选 -->
       <div class="filter-chip" :class="{ active: isQuickActive('month') }" @click="handleQuickFilter('month')">本月</div>
       <div class="filter-chip" :class="{ active: isQuickActive('threeMonths') }" @click="handleQuickFilter('threeMonths')">近三月</div>
       <div class="filter-chip" :class="{ active: isQuickActive('year') }" @click="handleQuickFilter('year')">今年</div>
 
-      <!-- 标签筛选 -->
       <div v-if="tags.length > 0" class="filter-chip tag-chip-trigger" :class="{ active: modelValue.selectedTagIds.length > 0 }" @click="showTagPopover = !showTagPopover">
         <van-icon name="label-o" size="13" />
-        <span>{{ modelValue.selectedTagIds.length > 0 ? `已选${modelValue.selectedTagIds.length}个` : '标签' }}</span>
+        <span>{{ modelValue.selectedTagIds.length > 0 ? '已选' + modelValue.selectedTagIds.length + '个' : '标签' }}</span>
         <van-icon name="arrow-down" size="10" class="chip-arrow" />
       </div>
 
-      <!-- 重置 -->
       <div v-if="hasActiveFilter" class="filter-chip reset-chip" @click="handleReset">重置</div>
     </div>
 
-    <!-- 标签浮层 -->
     <div v-if="showTagPopover && tags.length > 0" class="tag-popover">
       <div class="tag-grid">
         <div
@@ -44,10 +39,8 @@
       </div>
     </div>
 
-    <!-- 点击外部关闭标签浮层 -->
     <div v-if="showTagPopover" class="popover-mask" @click="showTagPopover = false" />
 
-    <!-- 日期区间选择器 -->
     <van-popup v-model:show="showRangePicker" position="bottom" round :lock-scroll="true" :safe-area-inset-bottom="true">
       <div class="date-picker-container">
         <div class="picker-header">
@@ -60,8 +53,8 @@
           type="range"
           :poppable="false"
           :show-confirm="false"
-          :min-date="new Date(2020, 0, 1)"
-          :max-date="new Date(2030, 11, 31)"
+          :min-date="minCalDate"
+          :max-date="maxCalDate"
           :default-date="defaultRangeDate"
           @select="onRangeSelect"
           @confirm="onRangeConfirm"
@@ -72,195 +65,193 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import type { Tag, FilterState } from '@/types/accounting';
+import { ref, computed } from 'vue'
+import type { Tag, FilterState } from '@/types/accounting'
 
 interface Props {
-  modelValue: FilterState;
-  tags: Tag[];
+  modelValue: FilterState
+  tags: Tag[]
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: FilterState): void;
-  (e: 'reset'): void;
-}>();
+  (e: 'update:modelValue', value: FilterState): void
+  (e: 'reset'): void
+}>()
 
-const showRangePicker = ref(false);
-const showTagPopover = ref(false);
-const calendarRef = ref();
-const tempStartDate = ref<string | null>(null);
-const tempEndDate = ref<string | null>(null);
+const showRangePicker = ref(false)
+const showTagPopover = ref(false)
+const calendarRef = ref()
+const tempStartDate = ref<string | null>(null)
+const tempEndDate = ref<string | null>(null)
 
-const now = new Date();
-const currentYear = now.getFullYear();
-const currentMonth = now.getMonth() + 1;
+const now = new Date()
+const currentYear = now.getFullYear()
+const currentMonth = now.getMonth() + 1
 
-function formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+const minCalDate = new Date(2020, 0, 1)
+const maxCalDate = new Date(2030, 11, 31)
+
+function fmt(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return y + '-' + m + '-' + d
+}
+
+function fmtShort(dateStr: string): string {
+  const d = new Date(dateStr)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return y + '-' + m + '-' + dd
 }
 
 const defaultRangeDate = computed(() => {
   if (props.modelValue.startDate && props.modelValue.endDate) {
-    return [new Date(props.modelValue.startDate), new Date(props.modelValue.endDate)] as [Date, Date];
+    return [new Date(props.modelValue.startDate), new Date(props.modelValue.endDate)] as [Date, Date]
   }
-  return undefined;
-});
+  return undefined
+})
 
 const rangeLabel = computed(() => {
-  const s = props.modelValue.startDate;
-  const e = props.modelValue.endDate;
-  if (!s || !e) return '';
-  const sd = new Date(s);
-  const ed = new Date(e);
-  const sy = sd.getFullYear();
-  const sm = String(sd.getMonth() + 1).padStart(2, '0');
-  const sdd = String(sd.getDate()).padStart(2, '0');
-  const ey = ed.getFullYear();
-  const em = String(ed.getMonth() + 1).padStart(2, '0');
-  const edd = String(ed.getDate()).padStart(2, '0');
+  const s = props.modelValue.startDate
+  const e = props.modelValue.endDate
+  if (!s || !e) return ''
+  const sd = new Date(s)
+  const ed = new Date(e)
+  const sy = sd.getFullYear()
+  const sm = String(sd.getMonth() + 1).padStart(2, '0')
+  const sdd = String(sd.getDate()).padStart(2, '0')
+  const ey = ed.getFullYear()
+  const em = String(ed.getMonth() + 1).padStart(2, '0')
+  const edd = String(ed.getDate()).padStart(2, '0')
   if (sy === ey && sm === em) {
-    return `${sm}-${sdd} ~ ${edd}`;
+    return sm + '-' + sdd + ' ~ ' + edd
   }
   if (sy === ey) {
-    return `${sm}-${sdd} ~ ${em}-${edd}`;
+    return sm + '-' + sdd + ' ~ ' + em + '-' + edd
   }
-  return `${sy}.${sm}.${sdd} ~ ${ey}.${em}.${edd}`;
-});
+  return sy + '.' + sm + '.' + sdd + ' ~ ' + ey + '.' + em + '.' + edd
+})
 
 const hasActiveFilter = computed(() => {
-  return !!(props.modelValue.startDate || props.modelValue.endDate || props.modelValue.selectedTagIds.length > 0);
-});
+  return !!(props.modelValue.startDate || props.modelValue.endDate || props.modelValue.selectedTagIds.length > 0)
+})
 
 function getTagStyle(tag: Tag, isSelected: boolean) {
   if (isSelected) {
-    return { backgroundColor: tag.color, color: '#ffffff', borderColor: tag.color };
+    return { backgroundColor: tag.color, color: '#ffffff', borderColor: tag.color }
   }
-  return { backgroundColor: '#ffffff', color: '#475569', borderColor: '#E2E8F0' };
+  return { backgroundColor: '#ffffff', color: '#475569', borderColor: '#E2E8F0' }
 }
 
 function toggleTag(tagId: string) {
-  const newSelected = [...props.modelValue.selectedTagIds];
-  const idx = newSelected.indexOf(tagId);
+  const list = [...props.modelValue.selectedTagIds]
+  const idx = list.indexOf(tagId)
   if (idx > -1) {
-    newSelected.splice(idx, 1);
+    list.splice(idx, 1)
   } else {
-    newSelected.push(tagId);
+    list.push(tagId)
   }
-  emitUpdate({ ...props.modelValue, selectedTagIds: newSelected });
+  emitUpdate({ ...props.modelValue, selectedTagIds: list })
 }
 
 function clearTags() {
-  emitUpdate({ ...props.modelValue, selectedTagIds: [] });
+  emitUpdate({ ...props.modelValue, selectedTagIds: [] })
 }
 
 function onRangeSelect(dates: [Date, Date]) {
-  tempStartDate.value = formatDate(dates[0]);
-  tempEndDate.value = formatDate(dates[1]);
+  tempStartDate.value = fmt(dates[0])
+  tempEndDate.value = fmt(dates[1])
 }
 
 function onRangeConfirm(dates: [Date, Date]) {
   emitUpdate({
     ...props.modelValue,
-    startDate: formatDate(dates[0]),
-    endDate: formatDate(dates[1]),
-  });
-  showRangePicker.value = false;
+    startDate: fmt(dates[0]),
+    endDate: fmt(dates[1]),
+  })
+  showRangePicker.value = false
 }
 
 function confirmRange() {
   if (tempStartDate.value && tempEndDate.value) {
-    emitUpdate({ ...props.modelValue, startDate: tempStartDate.value, endDate: tempEndDate.value });
+    emitUpdate({ ...props.modelValue, startDate: tempStartDate.value, endDate: tempEndDate.value })
   }
-  showRangePicker.value = false;
+  showRangePicker.value = false
 }
 
 function clearRange() {
-  emitUpdate({ ...props.modelValue, startDate: null, endDate: null });
+  emitUpdate({ ...props.modelValue, startDate: null, endDate: null })
 }
 
 function clearRangeAndClose() {
-  emitUpdate({ ...props.modelValue, startDate: null, endDate: null });
-  showRangePicker.value = false;
+  emitUpdate({ ...props.modelValue, startDate: null, endDate: null })
+  showRangePicker.value = false
 }
 
-function handleQuickFilter(type: 'month' | 'lastMonth' | 'threeMonths' | 'year' | 'all') {
-  let newState: FilterState;
+function monthRange(y: number, m: number): { start: string; end: string } {
+  const lastDay = new Date(y, m, 0).getDate()
+  const ms = String(m).padStart(2, '0')
+  return {
+    start: y + '-' + ms + '-01',
+    end: y + '-' + ms + '-' + String(lastDay).padStart(2, '0'),
+  }
+}
 
-  switch (type) {
-    case 'month':
-      newState = {
-        startDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`,
-        endDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate().toString().padStart(2, '0')}`,
-        selectedTagIds: [...props.modelValue.selectedTagIds],
-      };
-      break;
-    case 'lastMonth': {
-      const d = new Date(currentYear, currentMonth - 1, 0);
-      newState = {
-        startDate: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`,
-        endDate: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`,
-        selectedTagIds: [...props.modelValue.selectedTagIds],
-      };
-      break;
-    }
-    case 'threeMonths': {
-      const start = new Date(currentYear, currentMonth - 3, 1);
-      newState = {
-        startDate: `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-01`,
-        endDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate().toString().padStart(2, '0')}`,
-        selectedTagIds: [...props.modelValue.selectedTagIds],
-      };
-      break;
-    case 'year':
-      newState = {
-        startDate: `${currentYear}-01-01`,
-        endDate: `${currentYear}-12-31`,
-        selectedTagIds: [...props.modelValue.selectedTagIds],
-      };
-      break;
-    case 'all':
-      newState = { startDate: null, endDate: null, selectedTagIds: [] };
-      break;
+function handleQuickFilter(type: string) {
+  let newState: FilterState
+
+  if (type === 'month') {
+    const r = monthRange(currentYear, currentMonth)
+    newState = { startDate: r.start, endDate: r.end, selectedTagIds: [...props.modelValue.selectedTagIds] }
+  } else if (type === 'lastMonth') {
+    const d = new Date(currentYear, currentMonth - 1, 0)
+    const r = monthRange(d.getFullYear(), d.getMonth() + 1)
+    newState = { startDate: r.start, endDate: r.end, selectedTagIds: [...props.modelValue.selectedTagIds] }
+  } else if (type === 'threeMonths') {
+    const start = new Date(currentYear, currentMonth - 3, 1)
+    const rs = monthRange(start.getFullYear(), start.getMonth() + 1)
+    const re = monthRange(currentYear, currentMonth)
+    newState = { startDate: rs.start, endDate: re.end, selectedTagIds: [...props.modelValue.selectedTagIds] }
+  } else if (type === 'year') {
+    newState = { startDate: currentYear + '-01-01', endDate: currentYear + '-12-31', selectedTagIds: [...props.modelValue.selectedTagIds] }
+  } else {
+    newState = { startDate: null, endDate: null, selectedTagIds: [] }
   }
 
-  emitUpdate(newState);
+  emitUpdate(newState)
 }
 
 function isQuickActive(type: string): boolean {
-  const s = props.modelValue;
-  if (!s.startDate || !s.endDate) return false;
+  const s = props.modelValue
+  if (!s.startDate || !s.endDate) return false
 
-  switch (type) {
-    case 'month': {
-      const start = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
-      const end = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate().toString().padStart(2, '0')}`;
-      return s.startDate === start && s.endDate === end;
-    }
-    case 'threeMonths': {
-      const rs = new Date(currentYear, currentMonth - 3, 1);
-      const start = `${rs.getFullYear()}-${String(rs.getMonth() + 1).padStart(2, '0')}-01`;
-      const end = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${new Date(currentYear, currentMonth, 0).getDate().toString().padStart(2, '0')}`;
-      return s.startDate === start && s.endDate === end;
-    }
-    case 'year':
-      return s.startDate === `${currentYear}-01-01` && s.endDate === `${currentYear}-12-31`;
-    default:
-      return false;
+  if (type === 'month') {
+    const r = monthRange(currentYear, currentMonth)
+    return s.startDate === r.start && s.endDate === r.end
   }
+  if (type === 'threeMonths') {
+    const start = new Date(currentYear, currentMonth - 3, 1)
+    const rs = monthRange(start.getFullYear(), start.getMonth() + 1)
+    const re = monthRange(currentYear, currentMonth)
+    return s.startDate === rs.start && s.endDate === re.end
+  }
+  if (type === 'year') {
+    return s.startDate === (currentYear + '-01-01') && s.endDate === (currentYear + '-12-31')
+  }
+  return false
 }
 
 function handleReset() {
-  emit('reset');
-  showTagPopover.value = false;
+  emit('reset')
+  showTagPopover.value = false
 }
 
 function emitUpdate(value: FilterState) {
-  emit('update:modelValue', value);
+  emit('update:modelValue', value)
 }
 </script>
 
@@ -282,7 +273,6 @@ function emitUpdate(value: FilterState) {
   gap: 6px;
   overflow-x: auto;
   scrollbar-width: none;
-  -ms-overflow-style: none;
 
   &::-webkit-scrollbar {
     display: none;
