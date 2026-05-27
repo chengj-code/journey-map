@@ -39,8 +39,8 @@
       </div>
     </div>
 
-    <!-- 月度汇总卡片 -->
-    <div class="summary-card">
+    <!-- 月度汇总卡片（仅列表模式） -->
+    <div v-if="viewMode === 'list'" class="summary-card">
       <div class="summary-item">
         <span class="label">本月支出</span>
         <span class="amount expense">-¥{{ monthlySummary.totalExpense.toFixed(2) }}</span>
