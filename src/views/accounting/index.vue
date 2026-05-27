@@ -106,13 +106,8 @@
     />
 
     <!-- 浮动添加按钮（固定在右下角，避开 TabBar） -->
-    <div class="fab-wrapper" @click="openAddForm">
-      <van-floating-bubble
-        icon="plus"
-        axis="x"
-        :gap="20"
-        magnetic="x"
-      />
+    <div class="fab-button" @click="openAddForm">
+      <van-icon name="plus" size="24" color="#ffffff" />
     </div>
 
     <!-- 记账表单弹窗 -->
@@ -355,23 +350,27 @@ function handleFilterReset() {
   padding-bottom: 80px;
 }
 
-.fab-wrapper {
+.fab-button {
   position: fixed;
   right: 20px;
-  bottom: 80px; /* TabBar(62px) + 安全区域 + 间距 */
+  bottom: 80px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10B981, #059669);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 99;
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-
-  :deep(.van-floating-bubble) {
-    transform: none !important;
-    transition: none !important;
-  }
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:active {
-    opacity: 0.8;
-    transform: scale(0.92);
+    transform: scale(0.9);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
   }
 }
 
