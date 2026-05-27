@@ -215,7 +215,6 @@
         </div>
       </div>
     </van-popup>
-  </van-popup>
 </template>
 
 <script setup lang="ts">
