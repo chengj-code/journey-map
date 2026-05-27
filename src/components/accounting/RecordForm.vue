@@ -149,35 +149,72 @@
     </van-popup>
 
     <!-- 新建标签弹窗 -->
-    <van-dialog
+    <van-popup
       v-model:show="showAddTagDialog"
-      title="新建标签"
-      show-cancel-button
-      confirm-button-text="创建"
-      @confirm="handleCreateTag"
+      position="center"
+      round
+      :style="{ width: '85%', maxWidth: '360px' }"
+      :lock-scroll="true"
+      :close-on-click-overlay="true"
     >
-      <div class="add-tag-form">
-        <van-field
-          v-model="newTagName"
-          placeholder="标签名称"
-          maxlength="10"
-          required
-        />
-        <div class="color-picker">
-          <label class="color-label">颜色</label>
-          <div class="color-options">
-            <span
-              v-for="color in presetColors"
-              :key="color"
-              class="color-dot"
-              :class="{ selected: newTagColor === color }"
-              :style="{ backgroundColor: color }"
-              @click="newTagColor = color"
-            ></span>
+      <div class="add-tag-dialog">
+        <div class="dialog-header">
+          <h3>新建标签</h3>
+          <van-icon name="cross" size="18" color="#94A3B8" @click="showAddTagDialog = false" />
+        </div>
+
+        <div class="dialog-body">
+          <div class="input-section">
+            <label class="input-label">标签名称</label>
+            <div class="input-wrapper" :class="{ focused: nameFocused }">
+              <van-icon name="label-o" size="18" :color="nameFocused ? '#10B981' : '#CBD5E1'" />
+              <input
+                v-model="newTagName"
+                placeholder="输入标签名称..."
+                maxlength="10"
+                class="tag-input"
+                @focus="nameFocused = true"
+                @blur="nameFocused = false"
+                ref="tagInputRef"
+              />
+              <span class="char-count">{{ newTagName.length }}/10</span>
+            </div>
+          </div>
+
+          <div class="color-section">
+            <label class="section-label">选择颜色</label>
+            <div class="color-grid">
+              <div
+                v-for="(color, index) in presetColors"
+                :key="color"
+                class="color-item"
+                :class="{ selected: newTagColor === color }"
+                :style="{ '--dot-color': color, '--index': index }"
+                @click="newTagColor = color"
+              >
+                <div class="color-dot"></div>
+                <div v-if="newTagColor === color" class="check-icon">✓</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="preview-section">
+            <label class="section-label">预览效果</label>
+            <div class="preview-chip" :style="{ background: previewBgColor, borderColor: newTagColor }">
+              <span class="preview-dot" :style="{ backgroundColor: newTagColor }"></span>
+              <span class="preview-name" :style="{ color: newTagColor }">{{ newTagName || '标签名称' }}</span>
+            </div>
           </div>
         </div>
+
+        <div class="dialog-footer">
+          <button class="btn-cancel" @click="showAddTagDialog = false">取消</button>
+          <button class="btn-confirm" :disabled="!newTagName.trim()" @click="handleCreateTag">
+            创建标签
+          </button>
+        </div>
       </div>
-    </van-dialog>
+    </van-popup>
   </van-popup>
 </template>
 
@@ -231,9 +268,15 @@ const presetColors = [
   '#14B8A6', '#3B82F6', '#8B5CF6', '#EC4899',
 ];
 
+const previewBgColor = computed(() => {
+  return newTagColor.value ? `color-mix(in srgb, ${newTagColor.value} 12%, white)` : '#F1F5F9';
+});
+
 const showCategoryPicker = ref(false);
 const showDatePicker = ref(false);
 const showAddTagDialog = ref(false);
+const nameFocused = ref(false);
+const tagInputRef = ref();
 const showCustomCategory = ref(false);
 const customCategoryName = ref('');
 const tempCategory = ref('');
@@ -701,42 +744,260 @@ function handlePopupClose(show: boolean) {
   }
 }
 
-.add-tag-form {
-  padding: 8px 0;
-}
+.add-tag-dialog {
+  background: #ffffff;
+  overflow: hidden;
 
-.color-picker {
-  margin-top: 16px;
-
-  .color-label {
-    display: block;
-    font-size: 14px;
-    font-weight: 500;
-    color: #475569;
-    margin-bottom: 12px;
-  }
-
-  .color-options {
+  .dialog-header {
     display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
 
-  .color-dot {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 3px solid transparent;
-
-    &:active {
-      transform: scale(0.9);
+    h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1E293B;
+      margin: 0;
+      letter-spacing: -0.3px;
     }
 
-    &.selected {
-      border-color: #1E293B;
-      transform: scale(1.1);
+    .van-icon {
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 50%;
+      transition: background 0.2s;
+
+      &:active {
+        background: #F1F5F9;
+      }
+    }
+  }
+
+  .dialog-body {
+    padding: 0 24px 20px;
+  }
+
+  .input-section {
+    margin-bottom: 24px;
+
+    .input-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748B;
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: #F8FAFC;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      transition: all 0.25s ease;
+
+      &.focused {
+        background: #ffffff;
+        border-color: #10B981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+      }
+
+      .tag-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        font-size: 15px;
+        font-weight: 500;
+        color: #1E293B;
+        background: transparent;
+
+        &::placeholder {
+          color: #94A3B8;
+          font-weight: 400;
+        }
+      }
+
+      .char-count {
+        font-size: 12px;
+        color: #94A3B8;
+        flex-shrink: 0;
+        min-width: 28px;
+        text-align: right;
+      }
+    }
+  }
+
+  .color-section {
+    margin-bottom: 22px;
+
+    .section-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748B;
+      margin-bottom: 12px;
+      letter-spacing: 0.3px;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .color-item {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: popIn 0.3s ease backwards;
+      animation-delay: calc(var(--index) * 40ms);
+
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: scale(0.5);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      &:active {
+        transform: scale(0.88);
+      }
+
+      &.selected {
+        transform: scale(1.08);
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--dot-color) 45%, transparent);
+
+        .color-dot {
+          width: 22px;
+          height: 22px;
+          border: 2.5px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .check-icon {
+          position: absolute;
+          bottom: -2px;
+          right: -2px;
+          width: 18px;
+          height: 18px;
+          background: #1E293B;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+          color: white;
+          font-weight: 700;
+          animation: checkPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+          @keyframes checkPop {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+          }
+        }
+      }
+
+      .color-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--dot-color);
+        transition: all 0.25s ease;
+        box-shadow: inset 0 -2px 4px rgba(0,0,0,0.12);
+      }
+    }
+  }
+
+  .preview-section {
+    .section-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748B;
+      margin-bottom: 10px;
+      letter-spacing: 0.3px;
+    }
+
+    .preview-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 2px solid;
+      transition: all 0.3s ease;
+
+      .preview-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .preview-name {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+      }
+    }
+  }
+
+  .dialog-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px 20px;
+
+    button {
+      flex: 1;
+      height: 46px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      letter-spacing: 0.2px;
+    }
+
+    .btn-cancel {
+      background: #F1F5F9;
+      color: #475569;
+
+      &:active {
+        background: #E2E8F0;
+        transform: scale(0.97);
+      }
+    }
+
+    .btn-confirm {
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+
+      &:active:not(:disabled) {
+        transform: scale(0.97);
+        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+      }
+
+      &:disabled {
+        background: linear-gradient(135deg, #CBD5E1, #94A3B8);
+        box-shadow: none;
+        cursor: not-allowed;
+      }
     }
   }
 }
