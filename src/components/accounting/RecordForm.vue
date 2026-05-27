@@ -520,25 +520,27 @@ function handlePopupClose(show: boolean) {
 
 .tag-section {
   margin-bottom: 16px;
+  padding: var(--van-cell-padding, 10px) var(--van-cell-padding-x, 16px);
+  background: #fff;
 
   .tag-cell {
     display: flex;
     align-items: center;
-    padding: 10px 0;
-    min-height: 44px;
 
     .tag-label {
-      width: 90px;
+      width: var(--van-cell-label-width, 90px);
       flex-shrink: 0;
-      font-size: 14px;
-      font-weight: 500;
-      color: #323233; /* Vant van-cell title color */
+      font-size: var(--van-cell-font-size, 14px);
+      line-height: var(--van-cell-line-height, 24px);
+      color: var(--van-cell-text-color, #323233);
+      margin-right: var(--van-padding-xs, 8px);
     }
 
     .tag-content {
       flex: 1;
-      color: #969799; /* Vant van-cell value color */
-      font-size: 14px;
+      color: var(--van-cell-value-color, #969799);
+      font-size: var(--van-cell-font-size, 14px);
+      line-height: var(--van-cell-line-height, 24px);
 
       .add-tag-inline {
         color: #3B82F6;
@@ -550,7 +552,8 @@ function handlePopupClose(show: boolean) {
   }
 
   .tag-list {
-    padding-left: 90px;
+    margin-top: 10px;
+    margin-left: calc(var(--van-cell-label-width, 90px) + var(--van-padding-xs, 8px));
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
