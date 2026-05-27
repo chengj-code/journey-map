@@ -475,7 +475,7 @@ function updateCharts() {
       trendChart.setOption(getTrendOption(), true)
     }
     if (pieChart) {
-      pieChart.setOption(getPieOption(), true)
+      pieChart.setOption(getPieOption(), false)
     }
   })
 }
