@@ -95,7 +95,7 @@
     </div>
 
     <!-- 年份选择器 -->
-    <van-popup v-model:show="showYearPicker" position="bottom" round>
+    <van-popup v-model:show="showYearPicker" position="bottom" round :lock-scroll="true" :safe-area-inset-bottom="true">
       <van-picker
         :columns="yearColumns"
         :default-index="defaultYearIndex"
@@ -106,7 +106,7 @@
     </van-popup>
 
     <!-- 月份选择器 -->
-    <van-popup v-model:show="showMonthPicker" position="bottom" round>
+    <van-popup v-model:show="showMonthPicker" position="bottom" round :lock-scroll="true" :safe-area-inset-bottom="true">
       <van-picker
         :columns="monthColumns"
         :default-index="defaultMonthIndex"
@@ -117,7 +117,7 @@
     </van-popup>
 
     <!-- 日期选择器 -->
-    <van-popup v-model:show="showDatePicker" position="bottom" round>
+    <van-popup v-model:show="showDatePicker" position="bottom" round :lock-scroll="true" :safe-area-inset-bottom="true">
       <div class="date-picker-container">
         <div class="picker-header">
           <span @click="clearDate">清除</span>
@@ -408,8 +408,10 @@ function emitUpdate(value: FilterState) {
   border-bottom: 1px solid #E2E8F0;
   padding: 12px 16px;
   position: sticky;
-  top: 0;
-  z-index: 100;
+  top: 46px;
+  z-index: 10;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .time-filter-section {
@@ -431,16 +433,27 @@ function emitUpdate(value: FilterState) {
     cursor: pointer;
     transition: all 0.2s ease;
     border: 1px solid #E2E8F0;
+    position: relative;
+    z-index: 1;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    min-height: 36px;
+    min-width: 70px;
+    justify-content: center;
 
     span {
       font-size: 13px;
       font-weight: 500;
       color: #334155;
       white-space: nowrap;
+      pointer-events: none;
     }
 
     .van-icon {
       color: #94A3B8;
+      pointer-events: none;
+      flex-shrink: 0;
     }
 
     &:active {
