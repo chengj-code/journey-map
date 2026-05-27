@@ -105,14 +105,15 @@
       :filter-state="localFilterState"
     />
 
-    <!-- 浮动添加按钮 -->
-    <van-floating-bubble
-      icon="plus"
-      axis="xy"
-      :gap="20"
-      magnetic="x"
-      @click="openAddForm"
-    />
+    <!-- 浮动添加按钮（固定在右下角，避开 TabBar） -->
+    <div class="fab-wrapper" @click="openAddForm">
+      <van-floating-bubble
+        icon="plus"
+        axis="x"
+        :gap="20"
+        magnetic="x"
+      />
+    </div>
 
     <!-- 记账表单弹窗 -->
     <RecordForm
@@ -352,6 +353,26 @@ function handleFilterReset() {
   min-height: 100vh;
   background: #F8FAFC;
   padding-bottom: 80px;
+}
+
+.fab-wrapper {
+  position: fixed;
+  right: 20px;
+  bottom: 80px; /* TabBar(62px) + 安全区域 + 间距 */
+  z-index: 99;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+
+  :deep(.van-floating-bubble) {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.92);
+  }
 }
 
 .mode-bar {
