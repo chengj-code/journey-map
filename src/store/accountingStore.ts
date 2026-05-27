@@ -8,8 +8,16 @@ export const useAccountingStore = defineStore('accounting', {
     tags: [] as Tag[],
     currentBookId: '' as string,
     filterState: {
-      startDate: null as string | null,
-      endDate: null as string | null,
+      startDate: (() => {
+        const n = new Date();
+        return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-01`;
+      })(),
+      endDate: (() => {
+        const n = new Date();
+        const y = n.getFullYear();
+        const m = n.getMonth() + 1;
+        return `${y}-${String(m).padStart(2, '0')}-${new Date(y, m, 0).getDate().toString().padStart(2, '0')}`;
+      })(),
       selectedTagIds: [] as string[],
     } as FilterState,
   }),
@@ -75,9 +83,12 @@ export const useAccountingStore = defineStore('accounting', {
     },
 
     resetFilter() {
+      const n = new Date();
+      const y = n.getFullYear();
+      const m = n.getMonth() + 1;
       this.filterState = {
-        startDate: null,
-        endDate: null,
+        startDate: `${y}-${String(m).padStart(2, '0')}-01`,
+        endDate: `${y}-${String(m).padStart(2, '0')}-${new Date(y, m, 0).getDate().toString().padStart(2, '0')}`,
         selectedTagIds: [],
       };
     },
