@@ -52,6 +52,15 @@
       </div>
     </div>
 
+    <!-- 预算进度卡片（仅列表模式） -->
+    <BudgetCard
+      v-if="viewMode === 'list'"
+      :status="budgetStatus"
+      :totalAmount="currentBudget?.totalAmount ?? 0"
+      :category-statuses="categoryBudgetStatuses"
+      @setup="openBudgetSetup"
+    />
+
     <!-- 列表内容 -->
     <div class="record-list" v-if="viewMode === 'list'">
       <!-- 按日期分组 -->
@@ -103,6 +112,7 @@
       :records="filteredRecords"
       :date-range="filterDateRange"
       :filter-state="localFilterState"
+      :budget-status="budgetStatus"
     />
 
     <!-- 浮动添加按钮（固定在右下角，避开 TabBar） -->
@@ -137,6 +147,14 @@
       message="确定要删除该条记录吗？此操作不可恢复。"
       @confirm="handleConfirmDelete"
     />
+
+    <!-- 预算设置弹窗 -->
+    <BudgetSetup
+      :visible="showBudgetSetup"
+      :budget="currentBudget"
+      @confirm="handleBudgetConfirm"
+      @cancel="showBudgetSetup = false"
+    />
   </div>
 </template>
 
@@ -150,6 +168,8 @@ import FilterBar from '@/components/accounting/FilterBar.vue';
 import RecordForm from '@/components/accounting/RecordForm.vue';
 import StatisticsView from './StatisticsView.vue';
 import type { AccountingRecord } from '@/types/accounting';
+import BudgetCard from '@/components/accounting/BudgetCard.vue'
+import BudgetSetup from '@/components/accounting/BudgetSetup.vue'
 
 const store = useAccountingStore();
 
@@ -159,6 +179,7 @@ const editingRecord = ref<AccountingRecord | null>(null);
 const showActionSheet = ref(false);
 const showDeleteDialog = ref(false);
 const currentActionRecord = ref<AccountingRecord | null>(null);
+const showBudgetSetup = ref(false)
 
 const localFilterState = computed({
   get: () => store.filterState,
@@ -195,6 +216,10 @@ const filteredRecords = computed(() => {
 const monthlySummary = computed(() => {
   return store.monthlySummary;
 });
+
+const budgetStatus = computed(() => store.budgetStatus)
+const currentBudget = computed(() => store.currentBudget)
+const categoryBudgetStatuses = computed(() => store.categoryBudgetStatuses)
 
 const filterDateRange = computed(() => {
   return {
@@ -340,6 +365,25 @@ function handleConfirmDelete() {
 function handleFilterReset() {
   store.resetFilter();
   showToast('已重置筛选条件');
+}
+
+function openBudgetSetup() {
+  showBudgetSetup.value = true
+}
+
+function handleBudgetConfirm(data: { totalAmount: number; categories: Record<string, number> }) {
+  const n = new Date()
+  const y = n.getFullYear()
+  const m = n.getMonth() + 1
+  store.setBudget({
+    bookId: store.currentBookId!,
+    year: y,
+    month: m,
+    totalAmount: data.totalAmount,
+    categories: data.categories,
+  })
+  showBudgetSetup.value = false
+  showToast('预算已保存')
 }
 </script>
 

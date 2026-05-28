@@ -1,0 +1,27 @@
+# Checklist
+
+- [ ] Budget 接口定义包含所有必需字段（id, bookId, year, month, totalAmount, categories, createdAt, updatedAt）
+- [ ] Store state 中 budgets 数组可正确持久化到 localStorage
+- [ ] currentBudget getter 能根据筛选日期正确匹配对应月份预算
+- [ ] budgetStatus getter 计算结果准确（spent / remaining / percentage / isOver）
+- [ ] categoryBudgetStatuses getter 能正确计算各分类已用金额和百分比
+- [ ] setBudget action 可创建新预算（当月无预算时）
+- [ ] setBudget action 可更新已有预算（当月有预算时）
+- [ ] deleteBudget action 可删除指定月份预算
+- [ ] copyBudget action 可复制预算到目标月份
+- [ ] BudgetCard 无预算时显示引导卡片和设置按钮
+- [ ] BudgetCard 有预算时显示进度条、金额、百分比、剩余提示
+- [ ] BudgetCard 进度条颜色随百分比变化（绿/橙/红）
+- [ ] BudgetCard 超支时显示红色满条和超支百分比
+- [ ] BudgetCard 点击可展开分类预算明细
+- [ ] BudgetSetup 弹窗可输入总预算金额
+- [ ] BudgetSetup 快捷金额按钮点击后填入对应数值
+- [ ] BudgetSetup 分类预算区域可展开/折叠
+- [ ] BudgetSetup 分类预算各分类独立输入
+- [ ] BudgetSetup 分类预算之和超总预算时有警告提示
+- [ ] BudgetSetup 确认后正确保存到 store
+- [ ] 记账页面 summary-card 下方正确渲染 BudgetCard
+- [ ] 统计视图 overview-card 中有预算时显示预算进度行
+- [ ] 预算数据切换筛选范围后正确匹配目标月份
+- [ ] 类型检查通过（vue-tsc --noEmit 无报错）
+- [ ] 开发服务器正常启动，页面无运行时报错

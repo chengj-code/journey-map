@@ -16,6 +16,26 @@
           <span class="overview-amount income">+¥{{ totalIncome.toFixed(2) }}</span>
         </div>
       </div>
+      <!-- 预算进度 -->
+      <div v-if="props.budgetStatus" class="overview-item budget-overview-item">
+        <span class="overview-label">预算</span>
+        <div class="budget-progress-inline">
+          <div class="budget-bar-mini">
+            <div
+              class="budget-fill-mini"
+              :class="{
+                'fill-green': props.budgetStatus.percentage < 70,
+                'fill-orange': props.budgetStatus.percentage >= 70 && props.budgetStatus.percentage < 90,
+                'fill-red': props.budgetStatus.percentage >= 90 || props.budgetStatus.isOver,
+              }"
+              :style="{ width: Math.min(props.budgetStatus.percentage, 100) + '%' }"
+            />
+          </div>
+          <span class="budget-pct-mini" :class="{ 'text-red': props.budgetStatus.isOver }">
+            {{ props.budgetStatus.isOver ? '超支' : '' }}{{ Math.abs(props.budgetStatus.percentage).toFixed(0) }}%
+          </span>
+        </div>
+      </div>
       <div class="overview-divider"></div>
       <div class="overview-balance">
         <span class="balance-label">结余</span>
@@ -92,6 +112,12 @@ interface Props {
   records: AccountingRecord[]
   dateRange: { startDate: string | null; endDate: string | null }
   filterState?: FilterState
+  budgetStatus?: {
+    spent: number
+    remaining: number
+    percentage: number
+    isOver: boolean
+  } | null
 }
 
 const props = defineProps<Props>()
@@ -619,6 +645,44 @@ onBeforeUnmount(() => {
         color: #FECACA;
         text-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
       }
+    }
+  }
+
+  .budget-overview-item {
+    .budget-progress-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .budget-bar-mini {
+      flex: 1;
+      height: 8px;
+      background: #E2E8F0;
+      border-radius: 4px;
+      overflow: hidden;
+
+      .budget-fill-mini {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+
+        &.fill-green { background: #10B981; }
+        &.fill-orange { background: #F59E0B; }
+        &.fill-red { background: #EF4444; }
+      }
+    }
+
+    .budget-pct-mini {
+      font-size: 13px;
+      font-weight: 600;
+      color: #10B981;
+      white-space: nowrap;
+      min-width: 48px;
+      text-align: right;
+
+      &.text-red { color: #EF4444; }
     }
   }
 }

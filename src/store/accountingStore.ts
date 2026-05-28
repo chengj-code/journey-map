@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { AccountingBook, AccountingRecord, Tag, FilterState } from '@/types/accounting';
+import type { AccountingBook, AccountingRecord, Tag, FilterState, Budget, BudgetStatus, CategoryBudgetStatus } from '@/types/accounting';
 
 export const useAccountingStore = defineStore('accounting', {
   state: () => ({
@@ -20,6 +20,7 @@ export const useAccountingStore = defineStore('accounting', {
       })(),
       selectedTagIds: [] as string[],
     } as FilterState,
+    budgets: [] as Budget[],
   }),
 
   getters: {
@@ -74,6 +75,46 @@ export const useAccountingStore = defineStore('accounting', {
         ...tag,
         count: state.records.filter((record) => record.tags.includes(tag.id)).length,
       }));
+    },
+
+    currentBudget(state): Budget | null {
+      if (!state.filterState.startDate) return null;
+      const [targetYear, targetMonth] = state.filterState.startDate.split('-').slice(0, 2);
+      return state.budgets.find(
+        (b) => b.bookId === state.currentBookId && b.year === Number(targetYear) && b.month === Number(targetMonth)
+      ) || null;
+    },
+
+    budgetStatus(): BudgetStatus {
+      const current = this.currentBudget;
+      if (!current) {
+        return { spent: 0, remaining: 0, percentage: 0, isOver: false };
+      }
+      const spent = this.filteredRecords
+        .filter((r) => r.type === 'expense')
+        .reduce((sum, r) => sum + r.amount, 0);
+      const totalAmount = current.totalAmount;
+      const remaining = totalAmount - spent;
+      const percentage = spent > totalAmount ? Math.round((spent / totalAmount) * 100) : Math.min(Math.round((spent / totalAmount) * 100), 100);
+      return { spent, remaining, percentage, isOver: spent > totalAmount };
+    },
+
+    categoryBudgetStatuses(): CategoryBudgetStatus[] {
+      const current = this.currentBudget;
+      if (!current) return [];
+      return Object.entries(current.categories).map(([category, limit]) => {
+        const spent = this.filteredRecords
+          .filter((r) => r.type === 'expense' && r.category === category)
+          .reduce((sum, r) => sum + r.amount, 0);
+        return {
+          category,
+          limit,
+          spent,
+          remaining: limit - spent,
+          percentage: spent > limit ? Math.round((spent / limit) * 100) : Math.min(Math.round((spent / limit) * 100), 100),
+          isOver: spent > limit,
+        };
+      });
     },
   },
 
@@ -273,6 +314,61 @@ export const useAccountingStore = defineStore('accounting', {
       if (index !== -1) {
         this.tags.splice(index, 1);
       }
+    },
+
+    setBudget(data: { bookId: string; year: number; month: number; totalAmount: number; categories: Record<string, number> }) {
+      const existingIndex = this.budgets.findIndex(
+        (b) => b.bookId === data.bookId && b.year === data.year && b.month === data.month
+      );
+      const now = new Date().toISOString();
+      if (existingIndex !== -1) {
+        this.budgets[existingIndex] = {
+          ...this.budgets[existingIndex],
+          totalAmount: data.totalAmount,
+          categories: { ...this.budgets[existingIndex].categories, ...data.categories },
+          updatedAt: now,
+        };
+      } else {
+        const newBudget: Budget = {
+          id: this.generateId(),
+          bookId: data.bookId,
+          year: data.year,
+          month: data.month,
+          totalAmount: data.totalAmount,
+          categories: data.categories,
+          createdAt: now,
+          updatedAt: now,
+        };
+        this.budgets.push(newBudget);
+      }
+    },
+
+    deleteBudget(year: number, month: number) {
+      const index = this.budgets.findIndex(
+        (b) => b.bookId === this.currentBookId && b.year === year && b.month === month
+      );
+      if (index !== -1) {
+        this.budgets.splice(index, 1);
+      }
+    },
+
+    copyBudget(fromYear: number, fromMonth: number, toYear: number, toMonth: number) {
+      const source = this.budgets.find(
+        (b) => b.bookId === this.currentBookId && b.year === fromYear && b.month === fromMonth
+      );
+      if (!source) return;
+      const now = new Date().toISOString();
+      const newBudget: Budget = {
+        id: this.generateId(),
+        bookId: source.bookId,
+        year: toYear,
+        month: toMonth,
+        totalAmount: source.totalAmount,
+        categories: { ...source.categories },
+        createdAt: now,
+        updatedAt: now,
+      };
+      this.budgets.push(newBudget);
     },
   },
 

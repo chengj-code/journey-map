@@ -33,3 +33,30 @@ export interface FilterState {
   endDate: string | null
   selectedTagIds: string[]
 }
+
+export interface Budget {
+  id: string
+  bookId: string
+  year: number
+  month: number
+  totalAmount: number
+  categories: Record<string, number>
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BudgetStatus {
+  spent: number
+  remaining: number
+  percentage: number
+  isOver: boolean
+}
+
+export interface CategoryBudgetStatus {
+  category: string
+  budget: number
+  spent: number
+  remaining: number
+  percentage: number
+  isOver: boolean
+}
